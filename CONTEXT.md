@@ -62,7 +62,7 @@ Whoever changes state updates the handoff note at the milestone. If the designer
 
 ## Batches: several tasks while the designer is away
 
-`/design-line:run` is the one optional resident: a dispatcher that holds only the inbox and the ledger tail. It loads a batch while the designer is present (briefs written, every decision answered one at a time, ship consent recorded in each brief), runs each approved task as its own `line-coordinator` subagent (parallel across lanes and worktrees within `limits`, serial where writers share files), parks any question a task hits and moves on, and reports once when the designer returns, then resumes paused tasks with their answers. Walking away is possible exactly for tasks whose decisions were answered first.
+`/design-line:run` is the one optional resident: a dispatcher that holds only the inbox and the ledger tail. It loads a batch while the designer is present (briefs written, every decision answered one at a time, ship consent recorded in each brief), runs each approved task as its own `line-coordinator` subagent (parallel across lanes and worktrees within `limits`, serial where writers share files), parks any question a task hits and moves on, and reports once when the designer returns, then resumes paused tasks with their answers. Walking away is possible exactly for tasks whose decisions were answered first. Parallelism is by worktree; landing is serial: the dispatcher merges finished branches one at a time, re-running the gate on the merged tree, and sends a conflicting branch back to its writer to merge `main` in (never rebase or force-push).
 
 ## Seeing it from a phone
 

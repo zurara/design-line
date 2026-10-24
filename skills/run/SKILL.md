@@ -24,6 +24,16 @@ You are the dispatcher. You hold almost nothing: the inbox, the ledger tail, and
 - Keep the table with `${CLAUDE_PLUGIN_ROOT}/scripts/batch.sh set <task> <lane> <state> "<title>" "<note>"` (states queued / running / paused / ready / done), and every subagent you dispatch for it with `batch.sh worker <task> <role> <agent name> running "<what it is doing>"`, then `done` or `paused` when it returns (roles: coordinator, reader, writer, checker, ledger). The board shows them as an icon row on the task's card. After every state change, if `lanes.yaml` has a `board:` URL: `node ${CLAUDE_PLUGIN_ROOT}/scripts/board-snapshot.mjs`, then ArtifactData `update` collection `board`, doc `state`, `file_path` `_line/board.json` on that URL (`set` the first time; carry the `version` you last saw as `if_version`). That is what the designer sees on the phone. One write per state change, never on a timer.
 - Do not message the designer while running. If the designer reaches this session through Remote Control, answer from the batch table and the inbox, take their answers for paused tasks, and go on. If every remaining task is paused, stop and write the summary.
 
+## Merge queue (the dispatcher owns branches landing)
+
+Writers never merge; the dispatcher lands branches one at a time, in the order tasks finish, so parallel work never races on `main`.
+
+- Parallel is by worktree: tasks on different branches (different projects, different components) run at the same time. Two tasks that would touch the same files (the lane's `shared_files`, or the same project folder) run one after another, the second one started from the first one's branch tip or after it landed.
+- Landing a branch: `${CLAUDE_PLUGIN_ROOT}/scripts/merge.sh <lane> <branch>` in a throwaway worktree: `--no-ff`, the gate again on the merged tree, push, deploy check. The script aborts on a conflict and pushes nothing.
+- On a conflict (an earlier branch landed first): SendMessage the task's writer: "merge origin/<main> into your branch, resolve, run the gate, report" (merge, never rebase, never force-push). Then `line-checker` again, then back into the queue. Record it as `returned` in the usage log; two of those in one batch means the briefs overlapped and the next batch should serialize them.
+- PR lanes (`ship.mode: pr`): the dispatcher opens the PRs only when the brief says "ship: yes"; after one PR merges upstream, the other open branches of that lane get `origin/<main>` merged in at once so each PR stays mergeable alone.
+- Each landing is one ledger line and one board update; the designer sees the queue move on the phone.
+
 ## 3. Unload (卸货), when the designer returns
 
 One report, designer.md shape: done (what, commit or PR, screenshots, gate), and for each done task the cost line from `node ${CLAUDE_PLUGIN_ROOT}/scripts/usage-report.mjs <task>` (tokens, models, outcome) with its "Next time" lines, so the designer sees what the batch cost and where a lighter model would do; paused (the numbered questions, then ask them one at a time), ready to ship (ask yes per item), next in the inbox. As each paused question is answered, SendMessage the answer to that task's agent id so it continues from where it stopped; if that agent is gone, re-dispatch with the brief, which now holds the answer. Close with `/design-line:handoff` for each lane you touched.

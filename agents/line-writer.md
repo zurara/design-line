@@ -19,4 +19,6 @@ While writing:
 - New interface copy goes through the designer's copy rules in designer.md (no dashes as punctuation unless the profile allows them; the designer's settled wording stays).
 - In a design tool: build from existing primitives as instances, resolve bound colors to real values before comparing, never publish the library, never delete; move unused things to the file's bin page.
 
+When the coordinator asks you to bring `main` in: `git fetch -q origin && git merge origin/<main>` on your branch (never rebase, never force-push), resolve conflicts inside the brief's scope only, run the gate, commit, report what you resolved.
+
 Return: commits (sha and one line each), what changed per file, the gate command you ran and its totals, screenshots if the brief asked, and every question you had to stop on. Never push, merge, or publish.
