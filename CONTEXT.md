@@ -60,6 +60,10 @@ There is no resident coordinator session. A session opens for one task, acts as 
 
 Whoever changes state updates the handoff note at the milestone. If the designer chooses to keep one long-running session for a lane (optional), other sessions that touch that lane add a line `change: {MM-DD HH:MM} · {who} · {what}` under "Last updated" so the resident session can catch up and delete it. Nobody writes dashboards; boards are rendered from the files (`scripts/render-board.mjs`), read-only.
 
+## Batches: several tasks while the designer is away
+
+`/design-line:run` is the one optional resident: a dispatcher that holds only the inbox and the ledger tail. It loads a batch while the designer is present (briefs written, every decision answered one at a time, ship consent recorded in each brief), runs each approved task as its own `line-coordinator` subagent (parallel across lanes and worktrees within `limits`, serial where writers share files), parks any question a task hits and moves on, and reports once when the designer returns, then resumes paused tasks with their answers. Walking away is possible exactly for tasks whose decisions were answered first.
+
 ## The inbox: things that come up mid-task
 
 `_line/inbox.md` is one list every session reads at start and writes the moment something new is said. One line per item: `date | lane | what | blocks: <task id or -> | from`. Four cases, each with one fixed move:

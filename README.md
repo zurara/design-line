@@ -24,6 +24,10 @@ A **lane** is one kind of work: a component library, prototypes, a design-tool f
 
 Things come up mid-task. They go into `_line/inbox.md` the moment you say them, one line each, and the task continues. Four cases: blocks the task (becomes a sub-brief now); belongs to another lane (parked for that lane); small (done now, one commit, one ledger line); run in parallel (another writer, another worktree). When a task ends you are asked one thing: which item next, or stop.
 
+## Walking away
+
+`/design-line:run` loads a batch while you are here (briefs, every decision answered one at a time, whether to ship), then runs each approved task as its own subagent while you are gone, parks anything it cannot answer, and gives you one report when you return. One light resident instead of three heavy ones.
+
 ## The five rules
 
 1. One question at a time, the recommended option first, drawn before asked when the difference is visual.
@@ -51,7 +55,7 @@ _line/
 
 1. Install the plugin. Open Claude Code in the folder you want `_line/` to live in.
 2. `/design-line:init` — twenty minutes of questions, one at a time; it writes the profile and the lanes.
-3. `/design-line:line <lane> <task>` — or without a task, to take the next inbox item.
+3. `/design-line:line <lane> <task>` — or without a task, to take the next inbox item. `/design-line:run` to load a batch and walk away.
 4. Mid-task: `/design-line:park <what>`. Before stopping: `/design-line:handoff <lane>`.
 
 ## Teaching it to another designer
