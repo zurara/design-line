@@ -1,0 +1,97 @@
+# design-line lane configuration. One block per lane. Paths may start with ~ or be relative to the workspace root.
+# Written by /design-line:init; edit by hand any time. Keep organization facts (people, IDs, tools) in org.md, not here.
+version: 1
+ledger: _line/ledger.md
+trailer: "Co-Authored-By: Claude <noreply@anthropic.com>"   # appended to merge commits made by the coordinator
+
+lanes:
+  - id: example-code
+    name: Component library
+    kind: code                      # code | design-tool | prototype | docs | ledger
+    handoff: _line/lanes/example-code/handoff.md
+    repo: ~/code/components
+    main: main
+    worktrees: .claude/worktrees    # relative to repo; one task, one worktree
+    ports: [6006, 6007, 6008]       # ports this lane may use; stop them by port only
+    sources:                        # what readers read before a brief
+      - kind: code
+        path: ~/code/components
+      - kind: design-tool
+        ref: "<design file key or URL>"
+    rules:                          # files a writer must read whole before the first edit
+      - _line/rules/components.md
+    shared_files:                   # only the coordinator writes these, and last
+      - docs/CHANGELOG.md
+    gate:
+      setup: "yarn install && yarn build"
+      command: "yarn test && yarn lint && yarn tsc --noEmit"
+      pass: "0 failed"              # a substring the gate output must contain, or omit to rely on exit code
+    ship:
+      mode: pr                      # pr | merge | publish | none
+      approval: designer            # designer | coordinator
+      deploy_check: ""              # optional command whose output must contain "success", e.g. "gh run list -L 1 --branch main"
+    roles:
+      reader:
+        model: sonnet
+        effort: medium
+      writer:
+        model: opus
+        effort: high
+      checker:
+        model: sonnet
+        effort: medium
+    limits:
+      sessions: 3                   # task sessions open at once in this lane (the coordinator does not count)
+      single_writer: true           # writers on the same files run one after another
+
+  - id: example-prototype
+    name: Prototypes
+    kind: prototype
+    handoff: _line/lanes/example-prototype/handoff.md
+    repo: ~/code/prototypes
+    main: main
+    worktrees: .claude/worktrees
+    ports: [8766, 8767, 8781]
+    sources:
+      - kind: code
+        path: ~/code/prototypes
+      - kind: planning-tool
+        ref: "<board or database id>"
+    rules:
+      - _line/rules/prototypes.md
+    gate:
+      setup: ""
+      command: "npm run verify"
+      pass: "0 failed"
+    ship:
+      mode: merge                   # the coordinator merges gated branches into main
+      approval: coordinator
+      deploy_check: "gh run list -L 1 --branch main"
+    roles:
+      reader:
+        model: sonnet
+        effort: medium
+      writer:
+        model: opus
+        effort: high
+      checker:
+        model: sonnet
+        effort: medium
+    limits:
+      sessions: 3
+      single_writer: true
+
+  - id: ledger
+    name: Work items
+    kind: ledger                    # optional: reconciles the ledger with the planning tool; writes there only after the designer's yes
+    handoff: _line/lanes/ledger/handoff.md
+    sources:
+      - kind: planning-tool
+        ref: "<work items database>"
+    ship:
+      mode: publish
+      approval: designer
+    roles:
+      reader:
+        model: sonnet
+        effort: medium

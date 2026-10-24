@@ -1,0 +1,5 @@
+{
+  "name": "design-line",
+  "version": "0.1.0",
+  "description": "A portable production line for design work run through Claude: one pipeline shape (read, brief, approve, write, check, ship, record) instantiated per lane, with a coordinator, read-only readers, writers, checkers and an optional ledger. Organization, designer preferences and domain rules live in a separate profile folder, so the same plugin runs for any studio and any designer."
+}

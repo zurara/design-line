@@ -1,0 +1,20 @@
+---
+name: init
+description: Set up design-line for a new organization or a new designer. Interviews the designer about their lanes (what they make, where the code and design files live, how work is checked and shipped), their preferences (language, how to be asked, what needs their yes) and their organization (repos, tools, people, release process), then writes the _line/ profile folder from the templates. Use when a workspace has no _line/lanes.yaml yet, or when the designer wants to add a lane or redo the profile. Trigger words: "set up design-line", "init the line", "add a lane", "new designer", "new organization".
+---
+
+# /design-line:init
+
+You are setting up the production line for one designer in one organization. Everything you write goes into `_line/` at the workspace root (the directory the designer opens Claude in). Nothing organization-specific goes anywhere else.
+
+## Steps
+
+1. If `_line/lanes.yaml` exists, say so and ask whether to add a lane, redo the designer profile, redo the org profile, or stop. Otherwise create `_line/`, `_line/lanes/`, `_line/rules/` and copy `templates/ledger.md` and `templates/inbox.md` in.
+2. **Designer profile.** Ask, one question at a time, with the template's defaults as the recommended option: language; how they want to be asked (one at a time, drawn first, screenshot scale); what needs their yes (push, PR, publish, planning-tool writes, archiving, rule changes); report shape; model and effort table (offer the default). Write `_line/designer.md` from `templates/designer.md`. Use their words where they gave them.
+3. **Organization profile.** Ask for the facts in `templates/org.md`, section by section. Look up what you can yourself first (repo paths and main branches with `git`, open PR tooling with `gh auth status`, ports from existing dev scripts) and ask only for what you cannot find. Write `_line/org.md`. If they do not know a section yet, leave the heading with "not yet" under it.
+4. **Lanes.** For each kind of thing the designer makes (component library, prototypes, design-tool file, illustrations, documents, emails, anything), one lane. Ask per lane: name and id; repo or file and its main branch; where worktrees go; which ports it may use; what readers should read (sources); which rules files writers must read (create `_line/rules/<lane>.md` as an empty stub if none exists yet and say so); the gate (setup command, check command, the substring that means pass); how it ships (pr | merge | publish | none) and whose approval; a deploy check command if any; role models (offer the designer.md defaults). Write `_line/lanes.yaml` from `templates/lanes.yaml`, one block per lane, no example blocks left in. Offer the optional `ledger` lane if the organization has a planning tool.
+5. For each lane copy `templates/handoff.md` to its `handoff:` path with the lane name filled in and section 1 written from what you just learned.
+6. Validate: `node ${CLAUDE_PLUGIN_ROOT}/scripts/lib/config.mjs json` parses; `scripts/start.sh <lane>` runs for each lane. Fix what fails.
+7. Report in the designer's language: the files written, one line per lane (id, ships how, gate), and the two commands to start work: `/design-line:line <lane>` and `/design-line:park`.
+
+Do not invent people, IDs or rules. Where the designer has existing notes, memory files or rule documents, read them and propose their content for the profile instead of asking again.
