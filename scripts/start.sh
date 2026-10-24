@@ -19,7 +19,7 @@ if [ -n "$REPO" ] && [ -d "$REPO/.git" ] || git -C "$REPO" rev-parse >/dev/null 
   echo "   worktrees:"; git -C "$REPO" worktree list 2>/dev/null | sed 's/^/     /'
   if command -v gh >/dev/null 2>&1; then echo "   open PRs:"; (cd "$REPO" && gh pr list --limit 10 --json number,title,headRefName,mergeable --jq '.[] | "     #\(.number) \(.headRefName) \(.mergeable) · \(.title)"' 2>/dev/null); fi
 fi
-if [ -n "$PORTS" ]; then echo "== ports"; for p in $(echo "$PORTS" | tr -d '[]",'); do lsof -ti tcp:$p -sTCP:LISTEN >/dev/null 2>&1 && echo "   $p listening" || echo "   $p free"; done; fi
-INBOX="$ROOT/_line/inbox.md"; [ -f "$INBOX" ] && { echo "== inbox (this lane, then everything marked blocks:)"; grep -v "^#" "$INBOX" | grep -v "^Columns" | grep -v "^$" | grep -E -- " \| $LANE \| |blocks: [^-]" | sed "s/^/   /"; }
-LEDGER="$ROOT/$($CFG top ledger)"; [ -f "$LEDGER" ] && { echo "== ledger tail"; grep -v '^#' "$LEDGER" | grep -v '^$' | tail -6 | sed 's/^/   /'; }
+if [ -n "$PORTS" ]; then echo "== ports"; for p in $(echo "$PORTS" | tr -d '[]"' | tr ',' ' '); do lsof -ti tcp:$p -sTCP:LISTEN >/dev/null 2>&1 && echo "   $p listening" || echo "   $p free"; done; fi
+INBOX="$ROOT/_line/inbox.md"; [ -f "$INBOX" ] && { echo "== inbox (this lane, then everything marked blocks:)"; grep -E "^[0-9]{4}-" "$INBOX" | grep -E -- " \| $LANE \| |blocks: [^-]" | sed "s/^/   /"; }
+LEDGER="$ROOT/$($CFG top ledger)"; [ -f "$LEDGER" ] && { echo "== ledger tail"; grep -E '^[0-9]{4}-' "$LEDGER" | tail -6 | sed 's/^/   /'; }
 exit 0

@@ -4,7 +4,7 @@ import fs from 'node:fs'; import path from 'node:path'; import { load, expand } 
 const cfg = load(); if (!cfg) { console.error('no _line/lanes.yaml found'); process.exit(1); }
 const root = cfg._root, esc = s => String(s ?? '').replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 const read = p => { try { return fs.readFileSync(p, 'utf8'); } catch { return ''; } };
-const rows = t => t.split('\n').filter(l => l && !l.startsWith('#') && !l.startsWith('Columns'));
+const rows = t => t.split('\n').filter(l => /^\d{4}-/.test(l));
 const inbox = rows(read(path.join(root, '_line/inbox.md'))), ledger = rows(read(path.join(root, cfg.ledger || '_line/ledger.md'))).slice(-30).reverse();
 const section = (md, title) => { const m = md.split(/^## /m).find(s => s.startsWith(title)); return m ? m.split('\n').slice(1).join('\n').trim() : ''; };
 const lanes = (cfg.lanes || []).map(l => { const md = read(expand(l.handoff, root)); return { ...l, updated: (md.match(/Last updated:?\s*([^\n]+)/i) || [])[1] || '', open: section(md, '4.'), inbox: inbox.filter(r => r.split('|')[1]?.trim() === l.id) }; });
