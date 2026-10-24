@@ -1,65 +1,66 @@
 <meta charset="utf-8">
 <title>Line board</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: kanban, five columns that scroll sideways on a phone (scroll-snap) and sit side by side on a desk; each card = one task,
    with the subagents working on it as an icon row. Reads one db doc, board/state. */
-:root{--bg:#FFFFFF; --panel:#FAFAF8; --panel2:#FFFFFF; --ink:#262624; --ink2:#7B7A73; --line:#E8E5DE; --line2:#F0EEE8;--accent:#C47A5A;--ok:#7E9C83;--warn:#C9A961;--run:#7C93A8;
-  --l0:#7C93A8;--l1:#8E7FA8;--l2:#C9A961;--l3:#C47A5A;--l4:#7E9C83;--l5:#9E9C93;
-  --display:"Manrope","PingFang SC","Noto Sans SC",system-ui,sans-serif;--body:"Manrope","PingFang SC","Hiragino Sans GB","Noto Sans SC",system-ui,sans-serif;--mono:"JetBrains Mono","SF Mono",Menlo,monospace;color-scheme:light}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1D1E1C; --panel:#232523; --panel2:#2A2C29; --ink:#ECE9E2; --ink2:#9E9C93; --line:#3A3C38; --line2:#30322F;--accent:#D9977A;--ok:#9DB8A1;--warn:#D9BC7A;--run:#9BB0C4;--l0:#9BB0C4;--l1:#AC9FC4;--l2:#D9BC7A;--l3:#D9977A;--l4:#9DB8A1;--l5:#9E9C93;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#1D1E1C; --panel:#232523; --panel2:#2A2C29; --ink:#ECE9E2; --ink2:#9E9C93; --line:#3A3C38; --line2:#30322F;--accent:#D9977A;--ok:#9DB8A1;--warn:#D9BC7A;--run:#9BB0C4;--l0:#9BB0C4;--l1:#AC9FC4;--l2:#D9BC7A;--l3:#D9977A;--l4:#9DB8A1;--l5:#9E9C93;color-scheme:dark}
+:root{--bg:#FFFFFF; --panel:#F4F4F4; --panel2:#FFFFFF; --ink:#1A1A1A; --ink2:#8A8A8A; --line:#E3E3E3; --line2:#EEEEEE;--accent:#1A1A1A;--ok:#22A06B;--warn:#D6A531;--run:#3B82F6;
+  --l0:#3B82F6;--l1:#EC4899;--l2:#1F1F1F;--l3:#F59E0B;--l4:#22A06B;--l5:#8A8A8A;
+  --display:"Inter","PingFang SC","Noto Sans SC",system-ui,sans-serif;--body:"Inter","PingFang SC","Hiragino Sans GB","Noto Sans SC",system-ui,sans-serif;--mono:"JetBrains Mono",Menlo,monospace;color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#141414; --panel:#1E1E1E; --panel2:#191919; --ink:#F0F0F0; --ink2:#9A9A9A; --line:#2C2C2C; --line2:#262626;--accent:#F0F0F0;--ok:#4CC38A;--warn:#E0B64A;--run:#6AA1FF;--l0:#6AA1FF;--l1:#F472B6;--l2:#E6E6E6;--l3:#FBBF24;--l4:#4CC38A;--l5:#9A9A9A;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#141414; --panel:#1E1E1E; --panel2:#191919; --ink:#F0F0F0; --ink2:#9A9A9A; --line:#2C2C2C; --line2:#262626;--accent:#F0F0F0;--ok:#4CC38A;--warn:#E0B64A;--run:#6AA1FF;--l0:#6AA1FF;--l1:#F472B6;--l2:#E6E6E6;--l3:#FBBF24;--l4:#4CC38A;--l5:#9A9A9A;color-scheme:dark}
 *{box-sizing:border-box}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.45;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 24px;display:flex;flex-direction:column}
-h1{font-family:var(--display);font-weight:600;margin:0;font-size:26px;line-height:1.1;letter-spacing:-.01em}
+h1{font-weight:600;margin:0;font-size:22px;line-height:1.3;letter-spacing:-.01em}
 header{padding-block:36px 18px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.upd{font-family:var(--mono);font-size:11.5px;color:var(--ink2);display:flex;align-items:center;gap:6px}
+.upd{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);display:flex;align-items:center;gap:6px;font-weight:500}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--line)}.dot.live{background:var(--ok)}
 .legend{display:flex;gap:10px 16px;flex-wrap:wrap;font-size:12px;color:var(--ink2);align-items:center;padding-bottom:18px}
 .legend span{display:inline-flex;align-items:center;gap:5px}
-.legend svg{width:15px;height:15px}
+.legend svg{width:15px;height:15px;color:var(--ink)}
 .board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(272px,1fr);gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px;flex:1;min-height:0;scrollbar-width:none}
 .board::-webkit-scrollbar{display:none}
 @media (max-width:700px){.board{grid-auto-columns:100%;gap:0}.col{scroll-snap-stop:always}}
 .nav{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:10px}
 .nav::-webkit-scrollbar{display:none}
-.nav button,.tags button{font-family:var(--body);font-size:12.5px;border:1px solid var(--line);background:var(--panel2);color:var(--ink2);border-radius:999px;padding:5px 11px;cursor:pointer;white-space:nowrap;display:inline-flex;gap:6px;align-items:center}
+.nav button,.tags button{font-family:var(--body);font-size:12.5px;border:0;background:var(--panel);color:var(--ink2);border-radius:6px;padding:6px 11px;cursor:pointer;white-space:nowrap;display:inline-flex;gap:6px;align-items:center}
 .nav button i{width:7px;height:7px;border-radius:50%;display:inline-block}
-.nav button[aria-current="true"]{border-color:var(--ink);color:var(--ink)}
+.nav button[aria-current="true"]{background:var(--ink);color:var(--bg)}
 .nav button .n{font-family:var(--mono);font-size:11px}
 .tags{display:flex;gap:6px;flex-wrap:wrap;padding-bottom:10px}
 .tags button[aria-pressed="true"]{background:var(--ink);color:var(--panel2);border-color:var(--ink)}
 .tags .lbl{font-family:var(--mono);font-size:11px;color:var(--ink2);align-self:center;margin-right:2px}
-.card .tag{color:var(--ink2)}
+.card .tag{color:var(--ink2);text-transform:none;letter-spacing:0}
 @media (min-width:701px){.nav{display:none}}
 .col{background:var(--panel);border:1px solid var(--line2);border-radius:12px;display:flex;flex-direction:column;min-width:0;scroll-snap-align:start;max-height:calc(100vh - 150px)}
 .col h2{font-family:var(--display);font-weight:600;font-size:15px;margin:0;padding:14px 16px 12px;display:flex;align-items:baseline;gap:8px;border-bottom:1px solid var(--line2);position:sticky;top:0;background:var(--panel);border-radius:12px 10px 0 0}
-.col h2 .n{font-family:var(--mono);font-size:12px;color:var(--ink2);font-weight:500}
-.col h2 i{width:10px;height:10px;border-radius:50%;display:inline-block;align-self:center}
+.col h2 .n{font-family:var(--mono);font-size:11px;color:var(--ink3,#B5B5B5);font-weight:400}
+.col h2 i{width:8px;height:8px;border-radius:50%;display:inline-block}
 .col.wait h2 i{background:var(--accent)}.col.queue h2 i{background:var(--line)}.col.run h2 i{background:var(--run)}.col.ready h2 i{background:var(--warn)}.col.done h2 i{background:var(--ok)}
-.cards{display:grid;gap:10px;padding:14px;overflow-y:auto;align-content:start}
-.card{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:8px;min-width:0}
-.card .m{font-family:var(--mono);font-size:10.5px;color:var(--ink2);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.card .m .lane{color:var(--lc);font-weight:500;display:inline-flex;align-items:center;gap:6px}
+.cards{display:grid;gap:10px;padding:0 2px 8px;overflow-y:auto;align-content:start}
+.card{background:var(--panel2);border:0;border-radius:10px;padding:14px 16px;display:grid;gap:8px;min-width:0}
+.card .m{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-weight:500}
+.card .m .lane{color:var(--ink2);font-weight:500;display:inline-flex;align-items:center;gap:6px}
 .card .m .lane::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--lc)}
-.card .t{font-weight:600;overflow-wrap:anywhere;line-height:1.35}
-.card .w{font-size:12.5px;color:var(--ink2);overflow-wrap:anywhere}
-.workers{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
-.wk{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10.5px;color:var(--ink2);border:1px solid var(--line2);border-radius:999px;padding:2px 8px 2px 4px;background:var(--panel)}
-.wk svg{width:16px;height:16px;flex:none}
-.wk .s{width:6px;height:6px;border-radius:50%;background:var(--line)}
+.card .t{font-weight:500;font-size:14px;overflow-wrap:anywhere;line-height:1.45;text-transform:none;letter-spacing:0}
+.card .w{font-size:12.5px;color:var(--ink2);overflow-wrap:anywhere;text-transform:none;letter-spacing:0}
+.workers{display:grid;gap:4px;margin-top:6px;padding-top:10px;border-top:1px solid var(--panel2)}
+.wk{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink);padding:2px 0}
+.wk .st{color:var(--ink2);font-size:11.5px;margin-left:auto}
+.wk svg{width:16px;height:16px;flex:none;color:var(--ink)}
+.wk .s{width:6px;height:6px;border-radius:50%;background:var(--line);flex:none}
 .wk.running .s{background:var(--run);animation:pulse 1.4s ease-in-out infinite}.wk.done .s{background:var(--ok)}.wk.paused .s{background:var(--accent)}
-.wk.running{border-color:var(--run)}
+
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
 @media (prefers-reduced-motion: reduce){.wk.running .s{animation:none}}
-.empty{color:var(--ink2);font-size:12.5px;padding:14px 12px;text-align:center}
+.empty{color:var(--ink3,#B5B5B5);font-size:12.5px;padding:14px 2px}
 .lanes{margin-top:36px}
-details{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-top:6px}
+details{background:var(--panel);border:0;border-radius:10px;padding:8px 12px;margin-top:6px}
 summary{cursor:pointer;font-weight:600;display:flex;gap:8px;align-items:center}
 summary i{width:10px;height:10px;border-radius:50%;display:inline-block}
-summary .m{font-family:var(--mono);font-size:11px;color:var(--ink2);font-weight:400}
+summary .m{font-size:11px;color:var(--ink2);font-weight:400}
 details pre{white-space:pre-wrap;font:12px/1.5 var(--mono);color:var(--ink);margin:8px 0 2px;overflow-wrap:anywhere}
 .note{font-size:12px;color:var(--ink2);margin-top:12px}
 </style>
@@ -94,7 +95,7 @@ $('title').textContent=L.title;document.title=L.title;$('note').textContent=L.no
 $('legend').innerHTML=Object.entries(L.roles).map(([r,t])=>`<span>${ICON(r)}${esc(t)}</span>`).join('');
 const laneColor={};let activeTag=null,lastDoc=null;
 const TAG=/#([\p{L}\p{N}_-]+)/gu;const tagsOf=t=>[...String(t||'').matchAll(TAG)].map(m=>m[1]);
-function card(c){const tg=tagsOf(c.title+' '+(c.note||''));return `<div class="card" style="--lc:${laneColor[c.lane]||'var(--l5)'}"><div class="m"><span class="lane">${esc(c.lane)}</span>${tg.map(x=>`<span class="tag">#${esc(x)}</span>`).join('')}${c.meta.map(x=>`<span>${esc(x)}</span>`).join('')}</div><div class="t">${esc(c.title.replace(TAG,'').replace(/\s{2,}/g,' ').trim())}</div>${c.note?`<div class="w">${esc(c.note)}</div>`:''}${c.workers&&c.workers.length?`<div class="workers">${c.workers.map(w=>`<span class="wk ${esc(w.state||'')}" title="${esc(w.note||'')}">${ICON(w.role)}${esc(w.name||L.roles[w.role]||w.role)}<span class="s"></span></span>`).join('')}</div>`:''}</div>`}
+function card(c){const tg=tagsOf(c.title+' '+(c.note||''));return `<div class="card" style="--lc:${laneColor[c.lane]||'var(--l5)'}"><div class="m"><span class="lane">${esc(c.lane)}</span>${tg.map(x=>`<span class="tag">#${esc(x)}</span>`).join('')}${c.meta.map(x=>`<span>${esc(x)}</span>`).join('')}</div><div class="t">${esc(c.title.replace(TAG,'').replace(/\s{2,}/g,' ').trim())}</div>${c.note?`<div class="w">${esc(c.note)}</div>`:''}${c.workers&&c.workers.length?`<div class="workers">${c.workers.map(w=>`<span class="wk ${esc(w.state||'')}" title="${esc(w.note||'')}">${ICON(w.role)}${esc(w.name||L.roles[w.role]||w.role)}<span class="st">${esc(L.ws[w.state]||w.state||'')}</span><span class="s"></span></span>`).join('')}</div>`:''}</div>`}
 function col(key,cards){cards=activeTag?cards.filter(c=>tagsOf(c.title+' '+(c.note||'')).includes(activeTag)):cards;return `<section class="col ${key}" id="col-${key}"><h2><i></i>${esc(L.cols[key])}<span class="n">${cards.length}</span></h2><div class="cards">${cards.length?cards.map(card).join(''):`<div class="empty">${esc(L.empty)}</div>`}</div></section>`}
 function render(d){lastDoc=d;
   if(!d){$('board').innerHTML=`<div class="empty" style="grid-column:1/-1">${esc(L.noData)}</div>`;return}
