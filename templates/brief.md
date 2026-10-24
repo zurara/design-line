@@ -39,3 +39,7 @@ Numbered. Each with a screenshot or link. The recommended option first.
 - Gate:
 - Screenshots:
 - Open:
+
+## Cost and next time (from `scripts/usage-report.mjs <task>`)
+
+Paste the report: per subagent its model, effort, tokens, outcome; then the "Next time" lines. One sentence of your own on what made it cheap or expensive (a clear rule, a missing default, a question the brief should have carried).

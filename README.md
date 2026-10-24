@@ -32,6 +32,10 @@ Things come up mid-task. They go into `_line/inbox.md` the moment you say them, 
 
 Publish `templates/board.html` once as an artifact with the `db` capability and put its URL in `lanes.yaml` as `board:`. The dispatcher and `/design-line:handoff` push one document to it at each state change: waiting for you, running, done, inbox, lanes. Open it on a phone. To answer a paused task from the phone, Remote Control into the dispatcher session.
 
+## What it cost, and what to try next time
+
+Each subagent's model, effort, tokens and outcome are recorded as it returns. A task ends with a cost table and a "Next time" line: where a lighter model would do because the rules were clear, where a small model struggled and the rule it missed should be written down, where a question should have been in the brief. The direction accumulates in `_line/usage.tsv` across tasks, so defaults in `lanes.yaml` can be lowered with evidence.
+
 ## The five rules
 
 1. One question at a time, the recommended option first, drawn before asked when the difference is visual.

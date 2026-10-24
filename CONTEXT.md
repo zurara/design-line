@@ -79,6 +79,10 @@ Whoever changes state updates the handoff note at the milestone. If the designer
 
 When a task ends, the session reads the inbox and asks one question: which item next, or stop. The designer reorders by editing the file or saying so. The daily digest takes "still open" from the inbox.
 
+## Learning from each task
+
+Every subagent dispatch is recorded in `_line/usage.tsv` (`scripts/usage.sh add …`) with its model, effort, tokens, tool uses, duration and outcome: `clean` (first pass accepted), `returned` (sent back once), `escalated` (re-dispatched on a larger model), `paused` (stopped on a question). The numbers come from the Agent tool's usage block; the session's own tokens are not visible to the model (`/cost` shows them to the designer). At the end of a task `scripts/usage-report.mjs <task>` prints the cost per role and a "Next time" direction derived from the outcomes: a role that is clean several times on a large model is a candidate for a small model; a small model that had to be escalated keeps the large default or gets the missing rule written down; a pause means the brief template or designer.md lacks a default. The report goes into the brief and ends the task's report to the designer. The board shows each task's total and models.
+
 ## Questions to the designer
 
 Only the coordinator of the lane that is blocked asks. One question at a time, options with the recommended one first, drawn or screenshotted before asking when the difference is visual. A role running as a subagent cannot ask: it numbers the decisions in its report; the parent session asks and sends the answer back to the same agent.

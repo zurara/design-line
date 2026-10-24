@@ -85,7 +85,7 @@ function render(d){
   const tasks=d.tasks||[],inbox=d.inbox||[],ledger=d.ledger||[],lanes=d.lanes||[];
   lanes.forEach((l,i)=>laneColor[l.id]=`var(--l${i%6})`);
   const upd=new Date(d.updated);$('updt').textContent=`${L.updated} ${isNaN(upd)?'':upd.toLocaleString()}`;
-  const T=s=>tasks.filter(t=>t.state===s).map(t=>({lane:t.lane,title:t.title,note:t.note,meta:[t.id,t.updated||t.since||''],workers:t.workers||[]}));
+  const T=s=>tasks.filter(t=>t.state===s).map(t=>({lane:t.lane,title:t.title,note:t.note,meta:[t.id,t.updated||t.since||'',t.usage?`${t.usage.tokens>=1000?(t.usage.tokens/1000).toFixed(0)+'k':t.usage.tokens} tok · ${t.usage.models.join('+')}`:''].filter(Boolean),workers:t.workers||[]}));
   const inboxWait=inbox.filter(i=>(i.blocks&&i.blocks!=='-')||/等你|waiting|paused|needs you/i.test(i.what));
   const inboxRest=inbox.filter(i=>!inboxWait.includes(i));
   const I=arr=>arr.map(i=>({lane:i.lane,title:i.what,note:'',meta:[i.date,(i.blocks&&i.blocks!=='-')?`${L.blocks} ${i.blocks}`:'',i.from?`${L.inboxFrom} ${i.from}`:''].filter(Boolean),workers:[{role:'designer',name:L.roles.designer,state:'paused'}]}));

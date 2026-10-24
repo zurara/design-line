@@ -10,5 +10,7 @@ const inbox = rows(read(path.join(root, '_line/inbox.md'))).map(l => { const [da
 const ledger = rows(read(path.join(root, cfg.ledger || '_line/ledger.md'))).slice(-40).reverse().map(l => { const [time, lane, item, what, ref] = l.split('|').map(s => s.trim()); return { time, lane, item, what, ref }; });
 const batch = (() => { try { return JSON.parse(read(path.join(root, '_line/batch.json'))).tasks || []; } catch { return []; } })();
 const lanes = (cfg.lanes || []).map(l => { const md = read(expand(l.handoff, root)); return { id: l.id, name: l.name, ship: l.ship?.mode || '-', approval: l.ship?.approval || '-', updated: (md.match(/(?:Last updated|最后更新)[:：]?\s*([^\n。]+)/) || [])[1] || '', open: section(md, '4') }; });
+const usage = (() => { try { const [h, ...ls] = read(path.join(root, '_line/usage.tsv')).trim().split('\n'); const c = h.split('\t'); const u = {}; for (const l of ls) { const r = Object.fromEntries(l.split('\t').map((v, i) => [c[i], v])); const t = (u[r.task] ||= { tokens: 0, models: new Set(), n: 0 }); t.tokens += +r.tokens || 0; t.models.add(r.model); t.n++; } return Object.fromEntries(Object.entries(u).map(([k, v]) => [k, { tokens: v.tokens, models: [...v.models], n: v.n }])); } catch { return {}; } })();
+for (const t of batch) if (usage[t.id]) t.usage = usage[t.id];
 const doc = { updated: new Date().toISOString(), lanes, inbox, ledger, tasks: batch };
 const out = path.join(root, '_line', 'board.json'); fs.writeFileSync(out, JSON.stringify(doc)); console.log(out, JSON.stringify(doc).length, 'bytes');
