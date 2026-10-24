@@ -77,6 +77,8 @@ Whoever changes state updates the handoff note at the milestone. If the designer
 3. **Small** (one color, one line of copy): do it now, one commit, one ledger line. It never enters the inbox.
 4. **Should run now in parallel and does not block**: dispatch a writer to another worktree from this session, or the designer opens a second session. The designer keeps talking to this one.
 
+Lanes say where work ships; a topic says what it is for. Tag an inbox line, a task title or a brief with `#topic` (for example `#team`, `#homepage-v3`) when work on one topic crosses lanes. The board shows the tags and filters by them; nothing else reads them.
+
 When a task ends, the session reads the inbox and asks one question: which item next, or stop. The designer reorders by editing the file or saying so. The daily digest takes "still open" from the inbox.
 
 ## Learning from each task
