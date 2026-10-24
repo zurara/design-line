@@ -64,6 +64,10 @@ Whoever changes state updates the handoff note at the milestone. If the designer
 
 `/design-line:run` is the one optional resident: a dispatcher that holds only the inbox and the ledger tail. It loads a batch while the designer is present (briefs written, every decision answered one at a time, ship consent recorded in each brief), runs each approved task as its own `line-coordinator` subagent (parallel across lanes and worktrees within `limits`, serial where writers share files), parks any question a task hits and moves on, and reports once when the designer returns, then resumes paused tasks with their answers. Walking away is possible exactly for tasks whose decisions were answered first.
 
+## Seeing it from a phone
+
+`lanes.yaml` may name a `board:` URL: a published copy of `templates/board.html` with the `db` capability. It shows one document, `board/state`: waiting for the designer, running, recently done, the inbox, each lane's open items. `scripts/board-snapshot.mjs` builds that document from the files; the dispatcher pushes it with the ArtifactData tool after each state change, and `/design-line:handoff` pushes it at close. Nothing reads from the board, so it can never drift from the files for long, and it costs one write per change. To talk to a running dispatcher from a phone, the designer uses Remote Control on that session.
+
 ## The inbox: things that come up mid-task
 
 `_line/inbox.md` is one list every session reads at start and writes the moment something new is said. One line per item: `date | lane | what | blocks: <task id or -> | from`. Four cases, each with one fixed move:

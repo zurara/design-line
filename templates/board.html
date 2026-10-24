@@ -1,0 +1,72 @@
+<meta charset="utf-8">
+<title>Line board</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: phone-first single column; sections stack: waiting for you, running, done today, inbox, lanes. Reads one db doc, board/state. */
+:root{--bg:#E9EBEF;--panel:#F8F9FB;--panel2:#FFFFFF;--ink:#1C2129;--ink2:#5D6674;--line:#C7CCD5;--line2:#DEE2E8;--accent:#E4572E;--ok:#2E8B57;--warn:#B0700E;--run:#0E7F8C;
+  --display:"Saira Condensed","PingFang SC","Noto Sans SC",system-ui,sans-serif;--body:"IBM Plex Sans","PingFang SC","Hiragino Sans GB","Noto Sans SC",system-ui,sans-serif;--mono:"IBM Plex Mono",Menlo,monospace;color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#14171C;--panel:#1C2027;--panel2:#232830;--ink:#E7EAEF;--ink2:#9BA4B1;--line:#353C47;--line2:#2A3039;--accent:#FF7047;--ok:#4FBF80;--warn:#E3A63B;--run:#3FB9C8;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#14171C;--panel:#1C2027;--panel2:#232830;--ink:#E7EAEF;--ink2:#9BA4B1;--line:#353C47;--line2:#2A3039;--accent:#FF7047;--ok:#4FBF80;--warn:#E3A63B;--run:#3FB9C8;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 40px}
+.wrap{max-width:720px;margin:0 auto}
+h1,h2{font-family:var(--display);font-weight:700;margin:0;letter-spacing:.01em;text-wrap:balance}
+h1{font-size:34px;line-height:1}h2{font-size:20px;line-height:1.1;display:flex;align-items:baseline;gap:8px}
+h2 .n{font-family:var(--mono);font-size:12px;color:var(--ink2);font-weight:500}
+header{padding-block:22px 14px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.upd{font-family:var(--mono);font-size:12px;color:var(--ink2);display:flex;align-items:center;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line)}.dot.live{background:var(--ok)}
+section{margin-top:18px}
+.list{display:grid;gap:6px;margin-top:8px}
+.it{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:grid;gap:3px;min-width:0}
+.it.wait{border-left:4px solid var(--accent)}.it.run{border-left:4px solid var(--run)}.it.ready{border-left:4px solid var(--warn)}.it.done{border-left:4px solid var(--ok)}
+.it .m{font-family:var(--mono);font-size:11px;color:var(--ink2);display:flex;gap:8px;flex-wrap:wrap}
+.it .m b{font-weight:500;color:var(--ink)}
+.it .w{overflow-wrap:anywhere}
+.empty{color:var(--ink2);font-size:13.5px;background:var(--panel);border:1px dashed var(--line);border-radius:8px;padding:10px 12px;margin-top:8px}
+details{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-top:6px}
+summary{cursor:pointer;font-weight:600;display:flex;gap:8px;align-items:baseline}
+summary .m{font-family:var(--mono);font-size:11px;color:var(--ink2);font-weight:400}
+details pre{white-space:pre-wrap;font:12.5px/1.5 var(--mono);color:var(--ink);margin:8px 0 2px;overflow-wrap:anywhere}
+.note{font-size:13px;color:var(--ink2);margin-top:14px}
+</style>
+<div class="wrap">
+<header><div><div class="upd" id="upd"><span class="dot" id="dot"></span><span id="updt">…</span></div><h1 id="title">Line board</h1></div></header>
+<section><h2 id="h-wait"></h2><div id="wait"></div></section>
+<section><h2 id="h-run"></h2><div id="run"></div></section>
+<section><h2 id="h-done"></h2><div id="done"></div></section>
+<section><h2 id="h-inbox"></h2><div id="inbox"></div></section>
+<section><h2 id="h-lanes"></h2><div id="lanes"></div></section>
+<p class="note" id="note"></p>
+</div>
+<script>
+(async function(){
+const zh=(navigator.language||'').toLowerCase().startsWith('zh');
+const L=zh?{title:'流水线看板',wait:'等你',run:'在跑',done:'最近做完',inbox:'收件箱',lanes:'每条线',empty:'没有',noData:'还没有数据。调度员第一次写 board/state 以后这里会亮。',off:'看不到数据库：这个链接只能看页面本身。',live:'实时',updated:'更新于',note:'只读。数据由 design-line 的调度员在状态变化时写入 board/state；要回答问题或改顺序，用 Remote Control 进那个会话，或改 _line/inbox.md。',states:{queued:'排队',running:'在跑',paused:'停下等你',ready:'等你说出货',done:'做完'},blocks:'挡住',from:'来自'}
+:{title:'Line board',wait:'Waiting for you',run:'Running',done:'Recently done',inbox:'Inbox',lanes:'Lanes',empty:'Nothing',noData:'No data yet. This lights up after the dispatcher first writes board/state.',off:'Database not reachable from this view.',live:'live',updated:'updated',note:'Read-only. The design-line dispatcher writes board/state at each state change; to answer a question or reorder, use Remote Control into that session or edit _line/inbox.md.',states:{queued:'queued',running:'running',paused:'paused, needs you',ready:'ready to ship, needs your yes',done:'done'},blocks:'blocks',from:'from'};
+const $=id=>document.getElementById(id); const esc=s=>String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+$('title').textContent=L.title;document.title=L.title;$('note').textContent=L.note;
+const h=(id,t,n)=>{$(id).innerHTML=esc(t)+(n!=null?` <span class="n">${n}</span>`:'')};
+function render(d){
+  if(!d){h('h-wait',L.wait);h('h-run',L.run);h('h-done',L.done);h('h-inbox',L.inbox);h('h-lanes',L.lanes);$('wait').innerHTML=`<div class="empty">${esc(L.noData)}</div>`;return}
+  const tasks=d.tasks||[],inbox=d.inbox||[],ledger=d.ledger||[],lanes=d.lanes||[];
+  const upd=new Date(d.updated);$('updt').textContent=`${L.updated} ${isNaN(upd)?'':upd.toLocaleString()}`;
+  const waitT=tasks.filter(t=>t.state==='paused'||t.state==='ready');const waitI=inbox.filter(i=>i.blocks&&i.blocks!=='-'||/等你|waiting|paused|needs you/i.test(i.what));
+  h('h-wait',L.wait,waitT.length+waitI.length);
+  $('wait').innerHTML=(waitT.length+waitI.length)?`<div class="list">${waitT.map(t=>`<div class="it ${t.state==='ready'?'ready':'wait'}"><div class="m"><b>${esc(t.lane)}</b><span>${esc(L.states[t.state]||t.state)}</span><span>${esc(t.updated||'')}</span></div><div class="w">${esc(t.title)}${t.note?` · ${esc(t.note)}`:''}</div></div>`).join('')}${waitI.map(i=>`<div class="it wait"><div class="m"><b>${esc(i.lane)}</b>${i.blocks&&i.blocks!=='-'?`<span>${esc(L.blocks)} ${esc(i.blocks)}</span>`:''}<span>${esc(i.date)}</span></div><div class="w">${esc(i.what)}</div></div>`).join('')}</div>`:`<div class="empty">${esc(L.empty)}</div>`;
+  const run=tasks.filter(t=>t.state==='running'||t.state==='queued');h('h-run',L.run,run.length);
+  $('run').innerHTML=run.length?`<div class="list">${run.map(t=>`<div class="it run"><div class="m"><b>${esc(t.lane)}</b><span>${esc(L.states[t.state]||t.state)}</span><span>${esc(t.since||'')}</span></div><div class="w">${esc(t.title)}${t.note?` · ${esc(t.note)}`:''}</div></div>`).join('')}</div>`:`<div class="empty">${esc(L.empty)}</div>`;
+  const done=ledger.slice(0,12);h('h-done',L.done,done.length);
+  $('done').innerHTML=done.length?`<div class="list">${done.map(r=>`<div class="it done"><div class="m"><b>${esc(r.lane)}</b><span>${esc(r.time)}</span>${r.item&&r.item!=='-'?`<span>${esc(r.item)}</span>`:''}</div><div class="w">${esc(r.what)}${r.ref&&r.ref!=='-'?` <span class="m" style="display:inline">${esc(r.ref)}</span>`:''}</div></div>`).join('')}</div>`:`<div class="empty">${esc(L.empty)}</div>`;
+  const rest=inbox.filter(i=>!waitI.includes(i));h('h-inbox',L.inbox,rest.length);
+  $('inbox').innerHTML=rest.length?`<div class="list">${rest.map(i=>`<div class="it"><div class="m"><b>${esc(i.lane)}</b><span>${esc(i.date)}</span><span>${esc(L.from)} ${esc(i.from||'')}</span></div><div class="w">${esc(i.what)}</div></div>`).join('')}</div>`:`<div class="empty">${esc(L.empty)}</div>`;
+  h('h-lanes',L.lanes,lanes.length);
+  $('lanes').innerHTML=lanes.map(l=>`<details><summary>${esc(l.name)}<span class="m">${esc(l.id)} · ${esc(l.ship)} / ${esc(l.approval)} · ${esc(l.updated)}</span></summary><pre>${esc(l.open||'')}</pre></details>`).join('');
+}
+render(null);
+const db=await claude.use('db');
+if(!db){$('updt').textContent=L.off;return}
+db.doc('board/state').onSnapshot(s=>{$('dot').classList.add('live');$('dot').title=L.live;render(s.exists?s.data():null)},e=>{$('updt').textContent=e.message||e.code});
+})();
+</script>

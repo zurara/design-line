@@ -10,4 +10,5 @@ description: Close out a design-line session cleanly: write the lane's handoff n
 3. Ledger: every PR opened or merged, publish, or merge this session did has a line. Add what is missing with `scripts/ledger.sh`.
 4. Briefs this session touched: `status` is right (approved / done).
 5. `${CLAUDE_PLUGIN_ROOT}/scripts/ports.sh list <lane>`; stop the ones this session started, by port. Never the designer's own server (org.md names its port). Delete scratch worktrees, screenshots and temporary installs you created.
-6. Report in three lines: what shipped, what waits for the designer, what is next in the inbox.
+6. If `lanes.yaml` has a `board:` URL: `node ${CLAUDE_PLUGIN_ROOT}/scripts/board-snapshot.mjs` and push it with ArtifactData `update` (`board` / `state`, `file_path` `_line/board.json`, `if_version` as last read) so the phone shows the closing state.
+7. Report in three lines: what shipped, what waits for the designer, what is next in the inbox.

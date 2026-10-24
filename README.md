@@ -28,6 +28,10 @@ Things come up mid-task. They go into `_line/inbox.md` the moment you say them, 
 
 `/design-line:run` loads a batch while you are here (briefs, every decision answered one at a time, whether to ship), then runs each approved task as its own subagent while you are gone, parks anything it cannot answer, and gives you one report when you return. One light resident instead of three heavy ones.
 
+## Seeing it from a phone
+
+Publish `templates/board.html` once as an artifact with the `db` capability and put its URL in `lanes.yaml` as `board:`. The dispatcher and `/design-line:handoff` push one document to it at each state change: waiting for you, running, done, inbox, lanes. Open it on a phone. To answer a paused task from the phone, Remote Control into the dispatcher session.
+
 ## The five rules
 
 1. One question at a time, the recommended option first, drawn before asked when the difference is visual.

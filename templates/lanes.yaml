@@ -2,6 +2,7 @@
 # Written by /design-line:init; edit by hand any time. Keep organization facts (people, IDs, tools) in org.md, not here.
 version: 1
 ledger: _line/ledger.md
+board: ""                        # optional: URL of the published live board (templates/board.html); the dispatcher writes board/state there
 trailer: "Co-Authored-By: Claude <noreply@anthropic.com>"   # appended to merge commits made by the coordinator
 
 lanes:

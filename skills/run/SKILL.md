@@ -21,8 +21,8 @@ You are the dispatcher. You hold almost nothing: the inbox, the ledger tail, and
 - Each subagent does the task end to end (write, check, ship if the brief says ship: yes, ledger, handoff note) and returns a report, or stops with numbered questions.
 - A returned question: `inbox.sh add <lane> "<question> (task <id>, paused)" <task>` and keep the subagent's id in your table so you can resume it. Move to the next task. Never guess an answer.
 - A PR lane with "ship: hold": the subagent leaves the branch and the PR description ready and reports where; you note "ready to open" in the inbox.
-- Keep a table: task, lane, agent id, state (running / done / paused / ready-to-ship), ledger line.
-- Do not message the designer while running. If every remaining task is paused, stop and write the summary.
+- Keep the table with `${CLAUDE_PLUGIN_ROOT}/scripts/batch.sh set <task> <lane> <state> "<title>" "<note>"` (states queued / running / paused / ready / done). After every state change, if `lanes.yaml` has a `board:` URL: `node ${CLAUDE_PLUGIN_ROOT}/scripts/board-snapshot.mjs`, then ArtifactData `update` collection `board`, doc `state`, `file_path` `_line/board.json` on that URL (`set` the first time; carry the `version` you last saw as `if_version`). That is what the designer sees on the phone. One write per state change, never on a timer.
+- Do not message the designer while running. If the designer reaches this session through Remote Control, answer from the batch table and the inbox, take their answers for paused tasks, and go on. If every remaining task is paused, stop and write the summary.
 
 ## 3. Unload (卸货), when the designer returns
 
