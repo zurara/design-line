@@ -3,70 +3,99 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: phone-first single column; sections stack: waiting for you, running, done today, inbox, lanes. Reads one db doc, board/state. */
+/* Layout: kanban, five columns that scroll sideways on a phone (scroll-snap) and sit side by side on a desk; each card = one task,
+   with the subagents working on it as an icon row. Reads one db doc, board/state. */
 :root{--bg:#E9EBEF;--panel:#F8F9FB;--panel2:#FFFFFF;--ink:#1C2129;--ink2:#5D6674;--line:#C7CCD5;--line2:#DEE2E8;--accent:#E4572E;--ok:#2E8B57;--warn:#B0700E;--run:#0E7F8C;
+  --l0:#0E7F8C;--l1:#6650D6;--l2:#B0700E;--l3:#A23B72;--l4:#2E7D32;--l5:#5B6472;
   --display:"Saira Condensed","PingFang SC","Noto Sans SC",system-ui,sans-serif;--body:"IBM Plex Sans","PingFang SC","Hiragino Sans GB","Noto Sans SC",system-ui,sans-serif;--mono:"IBM Plex Mono",Menlo,monospace;color-scheme:light}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#14171C;--panel:#1C2027;--panel2:#232830;--ink:#E7EAEF;--ink2:#9BA4B1;--line:#353C47;--line2:#2A3039;--accent:#FF7047;--ok:#4FBF80;--warn:#E3A63B;--run:#3FB9C8;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#14171C;--panel:#1C2027;--panel2:#232830;--ink:#E7EAEF;--ink2:#9BA4B1;--line:#353C47;--line2:#2A3039;--accent:#FF7047;--ok:#4FBF80;--warn:#E3A63B;--run:#3FB9C8;color-scheme:dark}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#14171C;--panel:#1C2027;--panel2:#232830;--ink:#E7EAEF;--ink2:#9BA4B1;--line:#353C47;--line2:#2A3039;--accent:#FF7047;--ok:#4FBF80;--warn:#E3A63B;--run:#3FB9C8;--l0:#3FB9C8;--l1:#A192F2;--l2:#E3A63B;--l3:#E07AB0;--l4:#6CC070;--l5:#9BA4B1;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#14171C;--panel:#1C2027;--panel2:#232830;--ink:#E7EAEF;--ink2:#9BA4B1;--line:#353C47;--line2:#2A3039;--accent:#FF7047;--ok:#4FBF80;--warn:#E3A63B;--run:#3FB9C8;--l0:#3FB9C8;--l1:#A192F2;--l2:#E3A63B;--l3:#E07AB0;--l4:#6CC070;--l5:#9BA4B1;color-scheme:dark}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 40px}
-.wrap{max-width:720px;margin:0 auto}
-h1,h2{font-family:var(--display);font-weight:700;margin:0;letter-spacing:.01em;text-wrap:balance}
-h1{font-size:34px;line-height:1}h2{font-size:20px;line-height:1.1;display:flex;align-items:baseline;gap:8px}
-h2 .n{font-family:var(--mono);font-size:12px;color:var(--ink2);font-weight:500}
-header{padding-block:22px 14px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.upd{font-family:var(--mono);font-size:12px;color:var(--ink2);display:flex;align-items:center;gap:6px}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.45;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 24px;display:flex;flex-direction:column}
+h1{font-family:var(--display);font-weight:700;margin:0;font-size:30px;line-height:1;letter-spacing:.01em}
+header{padding-block:18px 10px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.upd{font-family:var(--mono);font-size:11.5px;color:var(--ink2);display:flex;align-items:center;gap:6px}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--line)}.dot.live{background:var(--ok)}
-section{margin-top:18px}
-.list{display:grid;gap:6px;margin-top:8px}
-.it{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:grid;gap:3px;min-width:0}
-.it.wait{border-left:4px solid var(--accent)}.it.run{border-left:4px solid var(--run)}.it.ready{border-left:4px solid var(--warn)}.it.done{border-left:4px solid var(--ok)}
-.it .m{font-family:var(--mono);font-size:11px;color:var(--ink2);display:flex;gap:8px;flex-wrap:wrap}
-.it .m b{font-weight:500;color:var(--ink)}
-.it .w{overflow-wrap:anywhere}
-.empty{color:var(--ink2);font-size:13.5px;background:var(--panel);border:1px dashed var(--line);border-radius:8px;padding:10px 12px;margin-top:8px}
+.legend{display:flex;gap:10px 14px;flex-wrap:wrap;font-size:12px;color:var(--ink2);align-items:center;padding-bottom:10px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend svg{width:15px;height:15px}
+.board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(272px,1fr);gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px;flex:1;min-height:0;scrollbar-width:thin}
+@media (max-width:700px){.board{grid-auto-columns:86vw}}
+.col{background:var(--panel);border:1px solid var(--line);border-radius:10px;display:flex;flex-direction:column;min-width:0;scroll-snap-align:start;max-height:calc(100vh - 150px)}
+.col h2{font-family:var(--display);font-weight:700;font-size:18px;margin:0;padding:10px 12px 8px;display:flex;align-items:baseline;gap:8px;border-bottom:1px solid var(--line2);position:sticky;top:0;background:var(--panel);border-radius:10px 10px 0 0}
+.col h2 .n{font-family:var(--mono);font-size:12px;color:var(--ink2);font-weight:500}
+.col h2 i{width:10px;height:10px;border-radius:50%;display:inline-block;align-self:center}
+.col.wait h2 i{background:var(--accent)}.col.queue h2 i{background:var(--line)}.col.run h2 i{background:var(--run)}.col.ready h2 i{background:var(--warn)}.col.done h2 i{background:var(--ok)}
+.cards{display:grid;gap:8px;padding:10px;overflow-y:auto;align-content:start}
+.card{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px 11px;display:grid;gap:6px;min-width:0;border-left:4px solid var(--lc,var(--line))}
+.card .m{font-family:var(--mono);font-size:10.5px;color:var(--ink2);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.card .m .lane{color:var(--lc);font-weight:500}
+.card .t{font-weight:600;overflow-wrap:anywhere;line-height:1.35}
+.card .w{font-size:12.5px;color:var(--ink2);overflow-wrap:anywhere}
+.workers{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.wk{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10.5px;color:var(--ink2);border:1px solid var(--line2);border-radius:999px;padding:2px 8px 2px 4px;background:var(--panel)}
+.wk svg{width:16px;height:16px;flex:none}
+.wk .s{width:6px;height:6px;border-radius:50%;background:var(--line)}
+.wk.running .s{background:var(--run);animation:pulse 1.4s ease-in-out infinite}.wk.done .s{background:var(--ok)}.wk.paused .s{background:var(--accent)}
+.wk.running{border-color:var(--run)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+@media (prefers-reduced-motion: reduce){.wk.running .s{animation:none}}
+.empty{color:var(--ink2);font-size:12.5px;padding:14px 12px;text-align:center}
+.lanes{margin-top:14px}
 details{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-top:6px}
-summary{cursor:pointer;font-weight:600;display:flex;gap:8px;align-items:baseline}
+summary{cursor:pointer;font-weight:600;display:flex;gap:8px;align-items:center}
+summary i{width:10px;height:10px;border-radius:50%;display:inline-block}
 summary .m{font-family:var(--mono);font-size:11px;color:var(--ink2);font-weight:400}
-details pre{white-space:pre-wrap;font:12.5px/1.5 var(--mono);color:var(--ink);margin:8px 0 2px;overflow-wrap:anywhere}
-.note{font-size:13px;color:var(--ink2);margin-top:14px}
+details pre{white-space:pre-wrap;font:12px/1.5 var(--mono);color:var(--ink);margin:8px 0 2px;overflow-wrap:anywhere}
+.note{font-size:12px;color:var(--ink2);margin-top:12px}
 </style>
-<div class="wrap">
-<header><div><div class="upd" id="upd"><span class="dot" id="dot"></span><span id="updt">…</span></div><h1 id="title">Line board</h1></div></header>
-<section><h2 id="h-wait"></h2><div id="wait"></div></section>
-<section><h2 id="h-run"></h2><div id="run"></div></section>
-<section><h2 id="h-done"></h2><div id="done"></div></section>
-<section><h2 id="h-inbox"></h2><div id="inbox"></div></section>
-<section><h2 id="h-lanes"></h2><div id="lanes"></div></section>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-coordinator" viewBox="0 0 16 16"><path d="M3 2.5h10v11H3z M5.5 2.5v-1h5v1 M5.5 7h5 M5.5 9.5h5 M5.5 12h3" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></symbol>
+  <symbol id="i-reader" viewBox="0 0 16 16"><circle cx="6.8" cy="6.8" r="4.3" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M10 10l4 4 M5 6.8h3.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></symbol>
+  <symbol id="i-writer" viewBox="0 0 16 16"><path d="M3 13l1-3.5 7.5-7.5 2.5 2.5L6.5 12z M10.5 3l2.5 2.5 M3 13h10" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+  <symbol id="i-checker" viewBox="0 0 16 16"><path d="M2 11.5L8 3l6 8.5z M5 11.5v-2 M8 11.5v-3.5 M11 11.5v-2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></symbol>
+  <symbol id="i-ledger" viewBox="0 0 16 16"><path d="M3.5 2h8a1 1 0 0 1 1 1v11H4.5a1 1 0 0 1-1-1z M5.5 2v12 M8 5.5h3 M8 8h3" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></symbol>
+  <symbol id="i-dispatcher" viewBox="0 0 16 16"><path d="M2 10h12 M3.5 7h3v3h-3z M9.5 5.5h3V10h-3z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><circle cx="4" cy="12.5" r="1" fill="currentColor"/><circle cx="8" cy="12.5" r="1" fill="currentColor"/><circle cx="12" cy="12.5" r="1" fill="currentColor"/></symbol>
+  <symbol id="i-designer" viewBox="0 0 16 16"><circle cx="8" cy="5.5" r="3" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M2.5 14c.8-3 3-4.5 5.5-4.5s4.7 1.5 5.5 4.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></symbol>
+</svg>
+<header><div><div class="upd"><span class="dot" id="dot"></span><span id="updt">…</span></div><h1 id="title">Line board</h1></div></header>
+<div class="legend" id="legend"></div>
+<div class="board" id="board"></div>
+<div class="lanes" id="lanes"></div>
 <p class="note" id="note"></p>
-</div>
 <script>
 (async function(){
 const zh=(navigator.language||'').toLowerCase().startsWith('zh');
-const L=zh?{title:'流水线看板',wait:'等你',run:'在跑',done:'最近做完',inbox:'收件箱',lanes:'每条线',empty:'没有',noData:'还没有数据。调度员第一次写 board/state 以后这里会亮。',off:'看不到数据库：这个链接只能看页面本身。',live:'实时',updated:'更新于',note:'只读。数据由 design-line 的调度员在状态变化时写入 board/state；要回答问题或改顺序，用 Remote Control 进那个会话，或改 _line/inbox.md。',states:{queued:'排队',running:'在跑',paused:'停下等你',ready:'等你说出货',done:'做完'},blocks:'挡住',from:'来自'}
-:{title:'Line board',wait:'Waiting for you',run:'Running',done:'Recently done',inbox:'Inbox',lanes:'Lanes',empty:'Nothing',noData:'No data yet. This lights up after the dispatcher first writes board/state.',off:'Database not reachable from this view.',live:'live',updated:'updated',note:'Read-only. The design-line dispatcher writes board/state at each state change; to answer a question or reorder, use Remote Control into that session or edit _line/inbox.md.',states:{queued:'queued',running:'running',paused:'paused, needs you',ready:'ready to ship, needs your yes',done:'done'},blocks:'blocks',from:'from'};
-const $=id=>document.getElementById(id); const esc=s=>String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const L=zh?{title:'流水线看板',cols:{wait:'等你',queue:'排队',run:'在跑',ready:'等你说出货',done:'做完'},empty:'空',noData:'还没有数据。调度员第一次写 board/state 以后这里会亮。',off:'这个链接看不到数据库。',updated:'更新于',
+  roles:{coordinator:'协调',reader:'读',writer:'写',checker:'查',ledger:'账本',dispatcher:'调度',designer:'你'},ws:{queued:'排队',running:'在跑',done:'完',paused:'停下',ready:'等你'},
+  note:'只读。调度员在每个状态变化时写一次 board/state，收工时再写一次。要回答停下的任务，用 Remote Control 进调度员的会话。',blocks:'挡住',lanesH:'每条线挂着的事',inboxFrom:'来自'}
+:{title:'Line board',cols:{wait:'Waiting for you',queue:'Queued',run:'Running',ready:'Ready to ship',done:'Done'},empty:'empty',noData:'No data yet. This lights up after the dispatcher first writes board/state.',off:'Database not reachable from this view.',updated:'updated',
+  roles:{coordinator:'coordinate',reader:'read',writer:'write',checker:'check',ledger:'ledger',dispatcher:'dispatch',designer:'you'},ws:{queued:'queued',running:'running',done:'done',paused:'paused',ready:'needs you'},
+  note:'Read-only. The dispatcher writes board/state once per state change and once at close. To answer a paused task, Remote Control into the dispatcher session.',blocks:'blocks',lanesH:'Open items per lane',inboxFrom:'from'};
+const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const ICON=r=>`<svg><use href="#i-${['coordinator','reader','writer','checker','ledger','dispatcher','designer'].includes(r)?r:'coordinator'}"/></svg>`;
 $('title').textContent=L.title;document.title=L.title;$('note').textContent=L.note;
-const h=(id,t,n)=>{$(id).innerHTML=esc(t)+(n!=null?` <span class="n">${n}</span>`:'')};
+$('legend').innerHTML=Object.entries(L.roles).map(([r,t])=>`<span>${ICON(r)}${esc(t)}</span>`).join('');
+const laneColor={};
+function card(c){return `<div class="card" style="--lc:${laneColor[c.lane]||'var(--l5)'}"><div class="m"><span class="lane">${esc(c.lane)}</span>${c.meta.map(x=>`<span>${esc(x)}</span>`).join('')}</div><div class="t">${esc(c.title)}</div>${c.note?`<div class="w">${esc(c.note)}</div>`:''}${c.workers&&c.workers.length?`<div class="workers">${c.workers.map(w=>`<span class="wk ${esc(w.state||'')}" title="${esc(w.note||'')}">${ICON(w.role)}${esc(w.name||L.roles[w.role]||w.role)}<span class="s"></span></span>`).join('')}</div>`:''}</div>`}
+function col(key,cards){return `<section class="col ${key}"><h2><i></i>${esc(L.cols[key])}<span class="n">${cards.length}</span></h2><div class="cards">${cards.length?cards.map(card).join(''):`<div class="empty">${esc(L.empty)}</div>`}</div></section>`}
 function render(d){
-  if(!d){h('h-wait',L.wait);h('h-run',L.run);h('h-done',L.done);h('h-inbox',L.inbox);h('h-lanes',L.lanes);$('wait').innerHTML=`<div class="empty">${esc(L.noData)}</div>`;return}
+  if(!d){$('board').innerHTML=`<div class="empty" style="grid-column:1/-1">${esc(L.noData)}</div>`;return}
   const tasks=d.tasks||[],inbox=d.inbox||[],ledger=d.ledger||[],lanes=d.lanes||[];
+  lanes.forEach((l,i)=>laneColor[l.id]=`var(--l${i%6})`);
   const upd=new Date(d.updated);$('updt').textContent=`${L.updated} ${isNaN(upd)?'':upd.toLocaleString()}`;
-  const waitT=tasks.filter(t=>t.state==='paused'||t.state==='ready');const waitI=inbox.filter(i=>i.blocks&&i.blocks!=='-'||/等你|waiting|paused|needs you/i.test(i.what));
-  h('h-wait',L.wait,waitT.length+waitI.length);
-  $('wait').innerHTML=(waitT.length+waitI.length)?`<div class="list">${waitT.map(t=>`<div class="it ${t.state==='ready'?'ready':'wait'}"><div class="m"><b>${esc(t.lane)}</b><span>${esc(L.states[t.state]||t.state)}</span><span>${esc(t.updated||'')}</span></div><div class="w">${esc(t.title)}${t.note?` · ${esc(t.note)}`:''}</div></div>`).join('')}${waitI.map(i=>`<div class="it wait"><div class="m"><b>${esc(i.lane)}</b>${i.blocks&&i.blocks!=='-'?`<span>${esc(L.blocks)} ${esc(i.blocks)}</span>`:''}<span>${esc(i.date)}</span></div><div class="w">${esc(i.what)}</div></div>`).join('')}</div>`:`<div class="empty">${esc(L.empty)}</div>`;
-  const run=tasks.filter(t=>t.state==='running'||t.state==='queued');h('h-run',L.run,run.length);
-  $('run').innerHTML=run.length?`<div class="list">${run.map(t=>`<div class="it run"><div class="m"><b>${esc(t.lane)}</b><span>${esc(L.states[t.state]||t.state)}</span><span>${esc(t.since||'')}</span></div><div class="w">${esc(t.title)}${t.note?` · ${esc(t.note)}`:''}</div></div>`).join('')}</div>`:`<div class="empty">${esc(L.empty)}</div>`;
-  const done=ledger.slice(0,12);h('h-done',L.done,done.length);
-  $('done').innerHTML=done.length?`<div class="list">${done.map(r=>`<div class="it done"><div class="m"><b>${esc(r.lane)}</b><span>${esc(r.time)}</span>${r.item&&r.item!=='-'?`<span>${esc(r.item)}</span>`:''}</div><div class="w">${esc(r.what)}${r.ref&&r.ref!=='-'?` <span class="m" style="display:inline">${esc(r.ref)}</span>`:''}</div></div>`).join('')}</div>`:`<div class="empty">${esc(L.empty)}</div>`;
-  const rest=inbox.filter(i=>!waitI.includes(i));h('h-inbox',L.inbox,rest.length);
-  $('inbox').innerHTML=rest.length?`<div class="list">${rest.map(i=>`<div class="it"><div class="m"><b>${esc(i.lane)}</b><span>${esc(i.date)}</span><span>${esc(L.from)} ${esc(i.from||'')}</span></div><div class="w">${esc(i.what)}</div></div>`).join('')}</div>`:`<div class="empty">${esc(L.empty)}</div>`;
-  h('h-lanes',L.lanes,lanes.length);
-  $('lanes').innerHTML=lanes.map(l=>`<details><summary>${esc(l.name)}<span class="m">${esc(l.id)} · ${esc(l.ship)} / ${esc(l.approval)} · ${esc(l.updated)}</span></summary><pre>${esc(l.open||'')}</pre></details>`).join('');
+  const T=s=>tasks.filter(t=>t.state===s).map(t=>({lane:t.lane,title:t.title,note:t.note,meta:[t.id,t.updated||t.since||''],workers:t.workers||[]}));
+  const inboxWait=inbox.filter(i=>(i.blocks&&i.blocks!=='-')||/等你|waiting|paused|needs you/i.test(i.what));
+  const inboxRest=inbox.filter(i=>!inboxWait.includes(i));
+  const I=arr=>arr.map(i=>({lane:i.lane,title:i.what,note:'',meta:[i.date,(i.blocks&&i.blocks!=='-')?`${L.blocks} ${i.blocks}`:'',i.from?`${L.inboxFrom} ${i.from}`:''].filter(Boolean),workers:[{role:'designer',name:L.roles.designer,state:'paused'}]}));
+  const doneT=T('done'),doneL=ledger.slice(0,15).map(r=>({lane:r.lane,title:r.what,note:r.ref&&r.ref!=='-'?r.ref:'',meta:[r.time,r.item&&r.item!=='-'?r.item:''].filter(Boolean),workers:[]}));
+  $('board').innerHTML=col('wait',[...T('paused'),...I(inboxWait)])+col('queue',[...T('queued'),...I(inboxRest).map(c=>({...c,workers:[]}))])+col('run',T('running'))+col('ready',T('ready'))+col('done',[...doneT,...doneL]);
+  $('lanes').innerHTML=`<h2 style="font-family:var(--display);font-size:18px;margin:0 0 4px">${esc(L.lanesH)}</h2>`+lanes.map((l,i)=>`<details><summary><i style="background:var(--l${i%6})"></i>${esc(l.name)}<span class="m">${esc(l.ship)} / ${esc(l.approval)} · ${esc(l.updated)}</span></summary><pre>${esc(l.open||'')}</pre></details>`).join('');
 }
 render(null);
 const db=await claude.use('db');
 if(!db){$('updt').textContent=L.off;return}
-db.doc('board/state').onSnapshot(s=>{$('dot').classList.add('live');$('dot').title=L.live;render(s.exists?s.data():null)},e=>{$('updt').textContent=e.message||e.code});
+db.doc('board/state').onSnapshot(s=>{$('dot').classList.add('live');render(s.exists?s.data():null)},e=>{$('updt').textContent=e.message||e.code});
 })();
 </script>

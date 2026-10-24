@@ -5,7 +5,7 @@ description: Start or continue work on one design-line lane as this session's ta
 
 # /design-line:line <lane> [task]
 
-Read `${CLAUDE_PLUGIN_ROOT}/CONTEXT.md` once. Then act as the `line-coordinator` role for this one task, in this session (do not dispatch a coordinator subagent for it; dispatch readers, writers and checkers).
+Read `${CLAUDE_PLUGIN_ROOT}/CONTEXT.md` once. If `lanes.yaml` has a `board:` URL, keep the task on it the way `/design-line:run` does: `scripts/batch.sh set` for the task, `batch.sh worker` for each subagent you dispatch, `board-snapshot.mjs` plus one ArtifactData `update` of `board/state` after each state change. Then act as the `line-coordinator` role for this one task, in this session (do not dispatch a coordinator subagent for it; dispatch readers, writers and checkers).
 
 1. `node ${CLAUDE_PLUGIN_ROOT}/scripts/lib/config.mjs home`; if empty, stop and point to `/design-line:init`. Read `_line/designer.md`, `_line/org.md`, the lane block.
 2. `${CLAUDE_PLUGIN_ROOT}/scripts/start.sh <lane>`. Read the handoff note whole and the lane's rules files' headings.
