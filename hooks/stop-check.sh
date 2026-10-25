@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # If a lane's ledger moved this session (ledger.sh leaves _line/.dirty-<lane>) and its handoff note is older than that, ask once to write the handoff.
 HERE="$(cd "$(dirname "$0")" && pwd)"; CFG="node $HERE/../scripts/lib/config.mjs"
+export DESIGN_LINE_HOME="${DESIGN_LINE_HOME:-$(node "$HERE/../scripts/lib/config.mjs" home 2>/dev/null)}"
 IN=$(cat); printf '%s' "$IN" | grep -q '"stop_hook_active": *true' && exit 0
 H="$($CFG home 2>/dev/null)"; [ -z "$H" ] && exit 0
 for f in "$H"/.dirty-*; do

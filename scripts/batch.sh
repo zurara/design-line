@@ -3,6 +3,7 @@
 # states: queued | running | paused | ready | done
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"; ROOT="$(node $HERE/lib/config.mjs root)" || exit 1; F="$ROOT/_line/batch.json"; . "$HERE/lib/lock.sh"
+export DESIGN_LINE_HOME="${DESIGN_LINE_HOME:-$(node "$HERE/lib/config.mjs" home 2>/dev/null)}"   # pin the profile for this run and its children, wherever cwd ends up
 [ -f "$F" ] || echo '{"tasks":[]}' > "$F"
 [ -z "${DL_LOCKED:-}" ] && case "${1:-}" in set|worker|clear) DL_LOCKED=1 with_lock batch "$0" "$@"; exit $?;; esac
 case "${1:-}" in

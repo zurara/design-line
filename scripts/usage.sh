@@ -5,6 +5,7 @@
 # The numbers come from the Agent tool's result: subagent_tokens, tool_uses, duration_ms. The session's own tokens are not visible to the model; /cost shows them.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"; ROOT="$(node $HERE/lib/config.mjs root)" || exit 1; F="$ROOT/_line/usage.tsv"
+export DESIGN_LINE_HOME="${DESIGN_LINE_HOME:-$(node "$HERE/lib/config.mjs" home 2>/dev/null)}"   # pin the profile for this run and its children, wherever cwd ends up
 [ -f "$F" ] || printf 'time\ttask\tlane\trole\tname\tmodel\teffort\ttokens\ttool_uses\tms\toutcome\tnote\n' > "$F"
 case "${1:-}" in
   add) [ $# -lt 11 ] && { echo 'usage.sh add <task> <lane> <role> <name> <model> <effort> <tokens> <tool_uses> <ms> <outcome> ["note"]'; exit 2; }

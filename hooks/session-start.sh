@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Prints where the profile folder is and the inbox, so every session starts knowing what is parked. Silent when no _line/ exists.
 HERE="$(cd "$(dirname "$0")" && pwd)"
+export DESIGN_LINE_HOME="${DESIGN_LINE_HOME:-$(node "$HERE/../scripts/lib/config.mjs" home 2>/dev/null)}"
 H="$(node "$HERE/../scripts/lib/config.mjs" home 2>/dev/null)" || exit 0
 [ -z "$H" ] && exit 0
 echo "design-line: profile at $H. Lanes: $(node "$HERE/../scripts/lib/config.mjs" lanes | tr '\n' ' ')"

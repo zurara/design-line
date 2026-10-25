@@ -2,6 +2,7 @@
 # design-line start: one screen of reality for a lane. Usage: start.sh <lane>
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"; CFG="node $HERE/lib/config.mjs"
+export DESIGN_LINE_HOME="${DESIGN_LINE_HOME:-$(node "$HERE/lib/config.mjs" home 2>/dev/null)}"   # pin the profile for this run and its children, wherever cwd ends up
 LANE="${1:-}"; [ -z "$LANE" ] && { echo "usage: start.sh <lane>"; $CFG lanes; exit 2; }
 HOME_DIR="$($CFG home)" || exit 1
 ROOT="$($CFG root)"

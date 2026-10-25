@@ -3,6 +3,7 @@
 # PreCompact output cannot add text to the summary (it can only block), so the state lives in the file and
 # hooks/after-compact.sh prints it back on SessionStart(compact).
 HERE="$(cd "$(dirname "$0")" && pwd)"; CFG="node $HERE/../scripts/lib/config.mjs"
+export DESIGN_LINE_HOME="${DESIGN_LINE_HOME:-$(node "$HERE/../scripts/lib/config.mjs" home 2>/dev/null)}"
 H="$($CFG home 2>/dev/null)"; [ -z "$H" ] && exit 0
 ROOT="$(dirname "$H")"; OUT="$H/.compact-state.md"
 {

@@ -6,6 +6,7 @@
 #   Example: gh run list -L 1 --branch main --commit {sha}. It passes on "completed success", fails on "completed failure" / "completed cancelled", and waits otherwise.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"; CFG="node $HERE/lib/config.mjs"
+export DESIGN_LINE_HOME="${DESIGN_LINE_HOME:-$(node "$HERE/lib/config.mjs" home 2>/dev/null)}"   # pin the profile for this run and its children, wherever cwd ends up
 LANE="${1:?lane}"; BR="${2:?branch}"; DRY="${3:-}"
 REPO="$($CFG get "$LANE" repo)"; MAIN="$($CFG get "$LANE" main)"; MAIN="${MAIN:-main}"
 MODE="$($CFG get "$LANE" ship.mode)"; APPROVAL="$($CFG get "$LANE" ship.approval)"; DEPLOY="$($CFG get "$LANE" ship.deploy_check)"

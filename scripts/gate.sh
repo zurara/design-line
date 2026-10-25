@@ -4,6 +4,7 @@
 # and stopped by its port afterwards. A busy port stops the gate: it is someone else's server.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"; CFG="node $HERE/lib/config.mjs"
+export DESIGN_LINE_HOME="${DESIGN_LINE_HOME:-$(node "$HERE/lib/config.mjs" home 2>/dev/null)}"   # pin the profile for this run and its children, wherever cwd ends up
 LANE="${1:?lane}"; WT="${2:-$($CFG get "$LANE" repo)}"; shift 2 2>/dev/null || shift $#
 CMD="$($CFG get "$LANE" gate.command)"; PASS="$($CFG get "$LANE" gate.pass)"
 SERVE="$($CFG get "$LANE" gate.serve)"; PORT="$($CFG get "$LANE" gate.port)"
@@ -16,7 +17,7 @@ if [ -n "$SERVE" ]; then
   ( cd "$WT" && nohup bash -c "${SERVE//\{port\}/$PORT}" >"$LOG.serve" 2>&1 & )
   for _ in $(seq 1 30); do listening "$PORT" && break; sleep 1; done
   listening "$PORT" || { echo "gate: server did not come up on $PORT (see $LOG.serve)"; exit 1; }
-  trap 'lsof -ti "tcp:$PORT" -sTCP:LISTEN | xargs kill 2>/dev/null; rm -f "$LOG.serve"' EXIT
+  trap '{ lsof -ti "tcp:$PORT" -sTCP:LISTEN | xargs kill; wait; } 2>/dev/null; rm -f "$LOG.serve"' EXIT
   echo "gate: serving $WT on $PORT"
 fi
 [ -n "$PORT" ] && CMD="${CMD//\{port\}/$PORT}"
