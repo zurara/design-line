@@ -2,7 +2,8 @@
 # design-line inbox: park or list things that came up. Usage: inbox.sh add <lane> "<what>" [blocks-task-id] | list [lane] | done <line-number>
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"; CFG="node $HERE/lib/config.mjs"
-ROOT="$($CFG root)" || exit 1; INBOX="$ROOT/_line/inbox.md"
+ROOT="$($CFG root)" || exit 1; INBOX="$ROOT/_line/inbox.md"; . "$HERE/lib/lock.sh"
+[ -z "${DL_LOCKED:-}" ] && case "${1:-}" in add|done) DL_LOCKED=1 with_lock inbox "$0" "$@"; exit $?;; esac
 [ -f "$INBOX" ] || cp "$HERE/../templates/inbox.md" "$INBOX"
 case "${1:-}" in
   add) LANE="${2:?lane}"; WHAT="${3:?what}"; BL="${4:--}"; FROM="${DESIGN_LINE_FROM:-designer}"

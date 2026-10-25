@@ -64,6 +64,19 @@ Whoever changes state updates the handoff note at the milestone. If the designer
 
 `/design-line:run` is the one optional resident: a dispatcher that holds only the inbox and the ledger tail. It loads a batch while the designer is present (briefs written, every decision answered one at a time, ship consent recorded in each brief), runs each approved task as its own `line-coordinator` subagent (parallel across lanes and worktrees within `limits`, serial where writers share files), parks any question a task hits and moves on, and reports once when the designer returns, then resumes paused tasks with their answers. Walking away is possible exactly for tasks whose decisions were answered first. Parallelism is by worktree; landing is serial: the dispatcher merges finished branches one at a time, re-running the gate on the merged tree, and sends a conflicting branch back to its writer to merge `main` in (never rebase or force-push).
 
+## Running several sessions at once
+
+Reads never conflict; every file is plain text. Writes are arranged so that sessions do not step on each other:
+
+- Append-only files (`ledger.md`, `usage.tsv`) and the inbox `add` take any number of writers.
+- `batch.json` and inbox `done` are read-modify-write; the scripts take a short lock (`_line/.lock-*`), so two sessions may call them at once. A stale lock directory left by a crashed session is removed by hand.
+- The board document is pinned by version: when an ArtifactData `update` reports a version conflict, re-run `board-snapshot.mjs` and update again with the version it names. The snapshot is built from files, so nothing is lost.
+- A lane's handoff note has one writer at a time: **run at most one session per lane**, plus optionally one dispatcher. A second session on the same lane only adds `change:` lines, never rewrites sections. The dispatcher's subagents count as its session.
+- `main` is protected by the merge script: it refuses to push when `origin/main` moved under it; the loser re-runs. Two sessions may land branches on the same repo; they just take turns.
+- Ports: a checker calls `ports.sh list <lane>` and takes a free one; two checkers on one lane need two free ports in `lanes.yaml`.
+
+So the practical limit is the number of lanes plus one: for three lanes, three task sessions and a dispatcher. More than one session on the same lane is allowed for reading and parking, not for running tasks.
+
 ## Seeing it from a phone
 
 `lanes.yaml` may name a `board:` URL: a published copy of `templates/board.html` with the `db` capability. It shows one document, `board/state`: waiting for the designer, running, recently done, the inbox, each lane's open items. `scripts/board-snapshot.mjs` builds that document from the files; the dispatcher pushes it with the ArtifactData tool after each state change, and `/design-line:handoff` pushes it at close. Nothing reads from the board, so it can never drift from the files for long, and it costs one write per change. To talk to a running dispatcher from a phone, the designer uses Remote Control on that session.
