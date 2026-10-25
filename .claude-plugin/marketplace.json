@@ -1,0 +1,15 @@
+{
+  "$schema": "https://code.claude.com/schemas/marketplace.json",
+  "name": "design-line-local",
+  "owner": { "name": "design-line", "email": "noreply@example.com" },
+  "plugins": [
+    {
+      "name": "design-line",
+      "source": "./",
+      "description": "A portable production line for design work run through Claude: one pipeline shape per lane, five roles, an inbox, a ledger, a live board, cost reports. Organization and designer profiles live outside the plugin in _line/.",
+      "version": "0.1.0",
+      "keywords": ["design", "workflow", "coordinator", "agents"],
+      "category": "workflow"
+    }
+  ]
+}
