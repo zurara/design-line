@@ -21,7 +21,8 @@ function suggest(taskRows, history) {
     if (small(r.model) && r.outcome === 'escalated') out.push(`${r.role} on ${r.lane}: a small model had to be re-dispatched. Keep the large model as this role's default here, or write down in the lane's rules what it missed so a small model can follow it next time.`);
     if (small(r.model) && r.outcome === 'returned') out.push(`${r.role} on ${r.lane}: a small model needed one return trip. Fine. If it happens twice in a row, raise the default.`);
     if (r.outcome === 'paused') out.push(`${r.role} on ${r.lane} stopped on a question the brief did not answer. Add that decision to the brief template's Decisions for this lane, or settle it as a rule in designer.md, so the next brief carries it.`);
-    if (r.role === 'checker' && /FAIL/i.test(r.note || '')) out.push(`checker found failures the writer should have caught: ${r.note}. If the same check fails again, make it a line in the lane's rules file.`);
+    if (r.role === 'checker' && r.outcome === 'returned') out.push(`checker on ${r.lane} sent work back: ${r.note || 'see brief'}. If the same check fails again, make it a line in the lane's rules file.`);
+    if (r.outcome === 'failed') out.push(`${r.role} on ${r.lane} failed outright (${r.note || 'no note'}). Look at the brief before re-dispatching.`);
   }
   return [...new Set(out)];
 }

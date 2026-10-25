@@ -1,7 +1,7 @@
 ---
 lane: <lane id>
 task: <short task id>
-status: draft        # draft → approved (only after the designer answered the decisions) → done
+status: draft        # draft → approved (all decisions answered) → done; paused = work stopped on a question the brief did not answer (Result may be filled)
 written: <YYYY-MM-DD>
 ---
 
@@ -23,11 +23,15 @@ Files or parts. For each: where it lives, what it becomes. Name the worktree.
 
 ## 4. Decisions for the designer
 
-Numbered. Each with a screenshot or link. The recommended option first.
+Each with a fixed id (Q1, Q2, …), a screenshot or link, the recommended option first. Short answers are matched by id.
 
-1. **<question>**
-   - A (recommended): …
-   - B: …
+- **Q1 <question>**
+  - A (recommended): …
+  - B: …
+
+## 4b. Defaults this lane applies without asking
+
+Copied from the lane's `defaults:` file (lanes.yaml), the lines that apply here. A writer that meets a case not covered stops; the coordinator asks, and the answer becomes a new line in that file.
 
 ## 5. Not in this task
 

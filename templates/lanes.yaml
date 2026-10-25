@@ -3,7 +3,7 @@
 version: 1
 ledger: _line/ledger.md
 board: ""                        # optional: URL of the published live board (templates/board.html); the dispatcher writes board/state there
-trailer: "Co-Authored-By: Claude <noreply@anthropic.com>"   # appended to merge commits made by the coordinator
+trailer: "Co-Authored-By: Claude <noreply@anthropic.com>"   # default for merge commits; a session sets DESIGN_LINE_TRAILER to the line for the model it actually runs on
 
 lanes:
   - id: example-code
@@ -21,10 +21,13 @@ lanes:
         ref: "<design file key or URL>"
     rules:                          # files a writer must read whole before the first edit
       - _line/rules/components.md
+    defaults: _line/rules/components-defaults.md   # known unknowns and what to do without asking; briefs copy the lines that apply
     shared_files:                   # only the coordinator writes these, and last
       - docs/CHANGELOG.md
     gate:
       setup: "yarn install && yarn build"
+      serve: ""                     # optional: a server the gate needs, started in the worktree by gate.sh and stopped by port after, e.g. "sh tools/serve.sh {port}"
+      port: 0
       command: "yarn test && yarn lint && yarn tsc --noEmit"
       pass: "0 failed"              # a substring the gate output must contain, or omit to rely on exit code
     ship:
@@ -62,12 +65,14 @@ lanes:
       - _line/rules/prototypes.md
     gate:
       setup: ""
+      serve: "sh tools/serve.sh {port}"
+      port: 8781
       command: "npm run verify"
       pass: "0 failed"
     ship:
       mode: merge                   # the coordinator merges gated branches into main
       approval: coordinator
-      deploy_check: "gh run list -L 1 --branch main"
+      deploy_check: "gh run list -L 10 --branch main --json headSha,status,conclusion --jq '.[] | select(.headSha==\"{sha}\") | \"\\(.status) \\(.conclusion)\"'"   # {sha} = the pushed merge commit; passes on "completed success"
     roles:
       reader:
         model: sonnet

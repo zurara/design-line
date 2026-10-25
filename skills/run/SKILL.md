@@ -10,8 +10,8 @@ You are the dispatcher. You hold almost nothing: the inbox, the ledger tail, and
 ## 1. Load (装车), with the designer present
 
 1. `${CLAUDE_PLUGIN_ROOT}/scripts/inbox.sh list [lane]`. Confirm which items ride this batch (one question, recommended set first).
-2. For each item without an approved brief: dispatch `line-reader`s (lane's reader model) in parallel across items, then write each brief from `templates/brief.md` into `_line/lanes/<lane>/briefs/<task>.md`, `status: draft`.
-3. Collect every decision from every brief into one numbered list. Ask the designer one at a time, drawn or screenshotted first when visual. Write each answer into its brief. For lanes with `ship.approval: designer`, ask once per task whether to ship on completion (PR, publish); write the answer into the brief's Decisions as "ship: yes / hold".
+2. For each item without an approved brief: dispatch `line-reader`s (lane's reader model) in parallel across items, always, even when the handoff note looks complete (what it looks like now, work-item state, other branches on the folder); then write each brief from `templates/brief.md` into `_line/lanes/<lane>/briefs/<task>.md`, `status: draft`.
+3. Collect every decision from every brief into one list with fixed ids (`Q1`, `Q2`, …, unique for the batch). Each AskUserQuestion starts with its id, and the id is written into the brief and the inbox, so a short answer ("3", "A") is matched back without guessing. Ask the designer one at a time, drawn or screenshotted first when visual. Write each answer into its brief. For lanes with `ship.approval: designer`, ask once per task whether to ship on completion (PR, publish); write the answer into the brief's Decisions as "ship: yes / hold".
 4. Set `status: approved` on briefs whose decisions are all answered. Items still missing an answer stay in the inbox marked `waiting`; they do not ride.
 5. Say in one line what will run, in what order, and what will wait. Then the designer may leave.
 
@@ -31,7 +31,7 @@ Writers never merge; the dispatcher lands branches one at a time, in the order t
 - Parallel is by worktree: tasks on different branches (different projects, different components) run at the same time. Two tasks that would touch the same files (the lane's `shared_files`, or the same project folder) run one after another, the second one started from the first one's branch tip or after it landed.
 - Landing a branch: `${CLAUDE_PLUGIN_ROOT}/scripts/merge.sh <lane> <branch>` in a throwaway worktree: `--no-ff`, the gate again on the merged tree, push, deploy check. The script aborts on a conflict and pushes nothing.
 - On a conflict (an earlier branch landed first): SendMessage the task's writer: "merge origin/<main> into your branch, resolve, run the gate, report" (merge, never rebase, never force-push). Then `line-checker` again, then back into the queue. Record it as `returned` in the usage log; two of those in one batch means the briefs overlapped and the next batch should serialize them.
-- PR lanes (`ship.mode: pr`): the dispatcher opens the PRs only when the brief says "ship: yes"; after one PR merges upstream, the other open branches of that lane get `origin/<main>` merged in at once so each PR stays mergeable alone.
+- PR lanes (`ship.mode: pr`): the task's `line-coordinator` opens the PR when its brief says "ship: yes" (the dispatcher never writes code or runs git itself); after one PR merges upstream, the other open branches of that lane get `origin/<main>` merged in at once so each PR stays mergeable alone.
 - Each landing is one ledger line and one board update; the designer sees the queue move on the phone.
 
 ## 3. Unload (卸货), when the designer returns
@@ -40,6 +40,7 @@ One report, designer.md shape: done (what, commit or PR, screenshots, gate), and
 
 ## Limits
 
-- You never write code, briefs' content beyond the template, or shipping actions yourself; subagents do.
+- You never write code, take screenshots, run gates, or ship yourself; subagents do. If you catch yourself opening a browser or a worktree, dispatch instead.
+- Set `DESIGN_LINE_TRAILER="Co-Authored-By: <the model you run on> <noreply@anthropic.com>"` in the shell before calling merge.sh, so merge commits name the real model.
 - You never relay consent: a "yes" in a brief was given here, in this conversation, before the designer left.
 - When the designer is present and working on one thing, `/design-line:line` is the right tool, not you.
