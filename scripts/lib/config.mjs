@@ -27,7 +27,8 @@ export function expand(p, root) {
 function scalar(s) {
   s = s.trim();
   if (s === '' ) return '';
-  if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) return s.slice(1, -1);
+  if (s.startsWith('"') && s.endsWith('"')) return s.slice(1, -1).replace(/\\(["\\])/g, '$1');
+  if (s.startsWith("'") && s.endsWith("'")) return s.slice(1, -1);
   if (s.startsWith('[') && s.endsWith(']')) return s.slice(1, -1).split(',').map(x => scalar(x)).filter(x => x !== '');
   if (s === 'true') return true; if (s === 'false') return false; if (s === 'null' || s === '~') return null;
   if (/^-?\d+(\.\d+)?$/.test(s)) return Number(s);
