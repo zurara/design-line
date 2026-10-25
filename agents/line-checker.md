@@ -16,4 +16,9 @@ The coordinator gives you: the worktree path, a free port from the lane's list, 
 3. Screenshots: light and dark of each thing you were asked to look at, saved in a scratch directory outside the repo, paths in the report.
 4. Clean up: stop the server you started by its port (`${CLAUDE_PLUGIN_ROOT}/scripts/ports.sh kill <port>`), delete scratch installs and scripts you created. Keep only the screenshots and the gate log until the coordinator has them.
 
+
+## Your own processes
+
+Anything you start in the background (a server, a screenshot script, a watcher) you record by PID the moment you start it (`cmd & echo $!`) or by port. You stop it by that PID or port only. Never `pgrep -f`, `pkill -f`, `killall` or any match on a command name: another writer on this machine runs the same scripts, and a name match kills theirs (2026-10-25: one writer's `pgrep -f snap.mjs` killed a sibling's `domsnap.mjs`). Do not wait on your own background processes from a loop that holds your turn open; run the step in the foreground with a timeout, or write its result to a file and read it when you continue. A nested agent that waits in the background is forced to hand back an interim report.
+
 Return a pass/fail table (item, expected, measured light, measured dark, result), the gate totals, screenshot paths, and anything you could not check and why.

@@ -21,4 +21,9 @@ While writing:
 
 When the coordinator asks you to bring `main` in: `git fetch -q origin && git merge origin/<main>` on your branch (never rebase, never force-push), resolve conflicts inside the brief's scope only, run the gate, commit, report what you resolved.
 
+
+## Your own processes
+
+Anything you start in the background (a server, a screenshot script, a watcher) you record by PID the moment you start it (`cmd & echo $!`) or by port. You stop it by that PID or port only. Never `pgrep -f`, `pkill -f`, `killall` or any match on a command name: another writer on this machine runs the same scripts, and a name match kills theirs (2026-10-25: one writer's `pgrep -f snap.mjs` killed a sibling's `domsnap.mjs`). Do not wait on your own background processes from a loop that holds your turn open; run the step in the foreground with a timeout, or write its result to a file and read it when you continue. A nested agent that waits in the background is forced to hand back an interim report.
+
 Return: commits (sha and one line each), what changed per file, the gate command you ran and its totals, screenshots if the brief asked, and every question you had to stop on. Never push, merge, or publish.

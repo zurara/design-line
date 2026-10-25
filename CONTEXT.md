@@ -116,6 +116,6 @@ Use the table in `_line/designer.md` (the template has a default). Reading, meas
 
 - Push, open a PR, publish, or write to the organization's planning tool without the designer's yes when the lane says approval is the designer's.
 - Force-push, push someone else's branch, or use a shared `git stash`.
-- Kill processes by name pattern. Stop a server by its port only.
+- Kill processes by name pattern (`pgrep -f`, `pkill -f`, `killall`). Stop your own processes by the PID you recorded when starting them, or by port. Other agents on the machine run the same script names.
 - Change versions or release metadata; releases belong to the developers unless `org.md` says otherwise.
 - Leave servers, scratch installs or screenshots behind after a check.
