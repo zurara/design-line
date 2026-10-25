@@ -1,14 +1,56 @@
 {
-  "description": "design-line guards: a one-screen start, a block on force-push and pattern kills, and a reminder to write the handoff note when the ledger moved.",
+  "description": "design-line guards: a one-screen start, a block on force-push and pattern kills, a reminder to write the handoff note when the ledger moved, and lossless compaction (state written before, printed after).",
   "hooks": {
     "SessionStart": [
-      { "hooks": [ { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/session-start.sh\"" } ] }
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/session-start.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": "compact|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/after-compact.sh\""
+          }
+        ]
+      }
     ],
     "PreToolUse": [
-      { "matcher": "Bash", "hooks": [ { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/guard.sh\"" } ] }
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/guard.sh\""
+          }
+        ]
+      }
     ],
     "Stop": [
-      { "hooks": [ { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/stop-check.sh\"" } ] }
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/stop-check.sh\""
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/pre-compact.sh\""
+          }
+        ]
+      }
     ]
   }
 }
