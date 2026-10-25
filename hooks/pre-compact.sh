@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Before the context is compacted: write the line's state to a file so nothing is lost in the summary, and refresh the board snapshot.
-# The SessionStart(compact) hook prints this file back into the fresh context.
+# PreCompact output cannot add text to the summary (it can only block), so the state lives in the file and
+# hooks/after-compact.sh prints it back on SessionStart(compact).
 HERE="$(cd "$(dirname "$0")" && pwd)"; CFG="node $HERE/../scripts/lib/config.mjs"
 H="$($CFG home 2>/dev/null)"; [ -z "$H" ] && exit 0
 ROOT="$(dirname "$H")"; OUT="$H/.compact-state.md"
@@ -13,6 +14,4 @@ ROOT="$(dirname "$H")"; OUT="$H/.compact-state.md"
   echo; echo "## read again after compaction: CONTEXT.md, _line/designer.md, the lane's handoff note. Continue the task you were on; the brief has its state."
 } > "$OUT"
 node "$HERE/../scripts/board-snapshot.mjs" >/dev/null 2>&1 || true
-# Tell the summarizer what to keep (ignored by runtimes that do not read hook JSON for this event).
-printf '{"hookSpecificOutput":{"hookEventName":"PreCompact","additionalContext":"design-line: keep in the summary the current lane, task id, brief path, which subagents are still out with their agent ids, and the last question asked to the designer. Everything else is in _line/.compact-state.md."}}\n'
 exit 0
