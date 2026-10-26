@@ -8,7 +8,9 @@ budget:                          # set by /design-line:init from the designer's 
   weekly_tokens: 0               # rough subagent-token budget per week, 0 = not tracked; usage-report shows the week's total against it
   board: on                      # on | off   off = no board pushes at all (the files are still the record; render-board.mjs makes a local page)
   parallel: 3                    # tasks the dispatcher runs at once across all lanes
-  readers: on                    # on | lean  lean = one reader per task with a 400-word limit instead of one per source
+  readers: fold                  # fold | lean | on
+                                 #   fold = the coordinator reads the sources itself (bounded, no reader subagent); fewer handoffs, nothing lost in a summary
+                                 #   lean = one reader per task, 400 words;  on = one reader per source. Compare with usage-report.mjs (it groups by this setting)
   default_model: opus            # the writer/coordinator model when a lane does not say; a small plan sets sonnet
 trailer: "Co-Authored-By: Claude <noreply@anthropic.com>"   # default for merge commits; a session sets DESIGN_LINE_TRAILER to the line for the model it actually runs on
 

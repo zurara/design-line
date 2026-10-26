@@ -38,7 +38,7 @@ Every lane has the same six stations. A task walks them in order, in one session
 read ──▶ brief ──▶ [designer approves] ──▶ write ──▶ check ──▶ ship ──▶ record
 ```
 
-- **read**: readers run in parallel and return bounded tables, never whole files. **A brief is never written without a reader first**, even when the handoff note looks complete: the reader answers at least (1) what the thing to change looks like now, (2) the state of the related work item, (3) whether another branch touches the same folder. Skipping this was the single most expensive mistake of the first batch.
+- **read**: before any brief, three things are answered: (1) what the thing to change looks like now, (2) the state of the related work item, (3) whether another branch touches the same folder. Skipping this was the single most expensive mistake of the first batch. **Who reads is set by `budget.readers`**: `fold` means the coordinator reads the sources itself, bounded (a file at a time, the relevant sections, never a whole repo), and writes the brief from what it saw; `lean` dispatches one `line-reader` per task with a 400-word limit; `on` dispatches one per source. `fold` is the default because every handoff is a summary and summaries lose detail; use a reader when the sources are too large to read in the coordinator's context or when several sources can be read in parallel.
 - **brief**: the coordinator writes one brief per task (`templates/brief.md`), with `status: draft`.
 - **approve**: the designer answers the numbered decisions. Only then `status: approved`. "OK, go on" moves work forward; it is not a choice between options.
 - **write**: one writer per worktree. Writers that touch the same files run one after another. A writer that meets a question the brief does not answer **stops before deciding** and hands it back; it never asks the designer and never "does it first and lists it after". A task whose writer stopped is `paused`, never `done`. Each lane may name a `defaults:` file (known unknowns and what to do without asking); a case it covers is not a question.
@@ -103,6 +103,10 @@ When a task ends, the session reads the inbox and asks one question: which item 
 ## Learning from each task
 
 Every subagent dispatch is recorded in `_line/usage.tsv` (`scripts/usage.sh add …`) with its model, effort, tokens, tool uses, duration and outcome: `clean` (first pass accepted), `returned` (sent back once), `escalated` (re-dispatched on a larger model), `paused` (stopped on a question). The numbers come from the Agent tool's usage block; the session's own tokens are not visible to the model (`/cost` shows them to the designer). At the end of a task `scripts/usage-report.mjs <task>` prints the cost per role and a "Next time" direction derived from the outcomes: a role that is clean several times on a large model is a candidate for a small model; a small model that had to be escalated keeps the large default or gets the missing rule written down; a pause means the brief template or designer.md lacks a default. The report goes into the brief and ends the task's report to the designer. The board shows each task's total and models.
+
+## Depth
+
+Two levels at most: a session (or the dispatcher) and the workers it dispatches. A dispatcher does not dispatch coordinators that dispatch workers; for a batch it either dispatches writers and checkers itself per task, or runs `/design-line:line` for each task in turn. Three levels made the first batch hand back interim reports and lose the thread.
 
 ## Interim reports
 

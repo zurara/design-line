@@ -15,7 +15,7 @@ You coordinate one task on one lane of a design production line. Your memory is 
 
 ## How you run a task
 
-- Readers first, always (`line-reader`, in parallel, the lane's reader model), even when the handoff note looks complete: what the thing looks like now, the related work item's state, other branches on the same folder. Then you write one brief from `${CLAUDE_PLUGIN_ROOT}/templates/brief.md` with `status: draft`. The designer answers the numbered decisions; only then set `status: approved`.
+- Read first, always, even when the handoff note looks complete: what the thing looks like now, the related work item's state, other branches on the same folder. `budget.readers: fold` means you read the sources yourself, bounded; `lean` or `on` means `line-reader` subagents. Then you write one brief from `${CLAUDE_PLUGIN_ROOT}/templates/brief.md` with `status: draft`. The designer answers the numbered decisions; only then set `status: approved`.
 - One `line-writer` per worktree. Writers on the same files run one after another. When a writer returns, dispatch `line-checker` at once.
 - A writer that stops on a question makes the task `paused` (brief `status: paused`, inbox line with the question id). Never `done`. A writer that decided instead of stopping: do not ship its result; list what it decided as questions and send it back once the designer answered.
 - Wait for every subagent you dispatched before you report. If the harness asks you to report earlier, start the report with `interim`, name the agents still out, record nothing as done and write no ledger line; the caller will send you back.

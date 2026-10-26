@@ -28,6 +28,10 @@ function suggest(taskRows, history) {
 }
 const weekAgo = Date.now() - 7 * 86400e3; const weekTot = rows.filter(r => { const m = r.time.match(/^(\d{4})-(\d{2})-(\d{2})/); return m && new Date(+m[1], m[2] - 1, +m[3]).getTime() >= weekAgo; }).reduce((a, r) => a + r.tokens, 0);
 const budget = +(cfg.budget && cfg.budget.weekly_tokens) || 0; if (!process.argv.includes('--json')) console.log(`Last 7 days: ${fmt(weekTot)} subagent tokens${budget ? ` of a ${fmt(budget)} budget (${Math.round(weekTot / budget * 100)}%)` : ''}${cfg.budget && cfg.budget.plan ? ` · plan ${cfg.budget.plan}` : ''}\n`);
+// the experiment the article suggests: fold the reader into the coordinator, keep it only if folded scores worse. Group tasks by the readers mode they ran under.
+if (!process.argv.includes('--json') && !task) { const groups = {}; for (const r of rows) { const g = r.readers || 'on'; const t = (groups[g] ||= {}); const x = (t[r.task] ||= { tokens: 0, n: 0, bad: 0 }); x.tokens += r.tokens; x.n++; if (r.outcome !== 'clean') x.bad++; }
+  const line = Object.entries(groups).map(([g, ts]) => { const tasks = Object.values(ts); const clean = tasks.filter(t => t.bad === 0).length; const avg = tasks.reduce((a, t) => a + t.tokens, 0) / tasks.length; return `${g}: ${tasks.length} tasks, ${Math.round(clean / tasks.length * 100)}% with every dispatch clean, ${fmt(Math.round(avg))} tokens per task`; });
+  if (line.length) console.log('By readers mode (compare after ~10 tasks each): ' + line.join(' · ') + '\n'); }
 const byTask = {}; for (const r of rows) (byTask[r.task] ||= []).push(r);
 const tasks = task ? { [task]: byTask[task] || [] } : byTask;
 if (process.argv.includes('--json')) { const o = {}; for (const [t, rs] of Object.entries(tasks)) o[t] = { tokens: rs.reduce((a, r) => a + r.tokens, 0), models: [...new Set(rs.map(r => r.model))], rows: rs.length, suggestions: suggest(rs, rows) }; console.log(JSON.stringify(o)); process.exit(0); }

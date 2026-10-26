@@ -15,9 +15,9 @@ You are setting up the production line for one designer in one organization. Eve
 
    | plan | board | parallel | readers | default_model | dispatcher |
    | --- | --- | --- | --- | --- | --- |
-   | pro | off | 1 | lean | sonnet (opus only for design-tool writers) | not recommended: use `/design-line:line` one task at a time |
-   | max5 | on | 2 | on | opus for writers, sonnet elsewhere | small batches, 2 to 3 tasks |
-   | max20, api, team | on | 3 | on | the designer.md table | full |
+   | pro | off | 1 | fold | sonnet (opus only for design-tool writers) | not recommended: use `/design-line:line` one task at a time |
+   | max5 | on | 2 | fold | opus for writers, sonnet elsewhere | small batches, 2 to 3 tasks |
+   | max20, api, team | on | 3 | fold (switch to `on` only for very large sources) | the designer.md table | full |
    | other (not a Claude subscription: another provider's budget, a company gateway) | off | 2 | lean | sonnet-class | small batches; set `weekly_tokens` from that provider's bill and let usage-report keep the count |
 
    Pro users hit the 5-hour window fast with parallel subagents; tell them plainly that one task at a time with small models is the shape that fits, and that the inbox, ledger and handoff still work the same. Write the same facts into designer.md's Budget section.
