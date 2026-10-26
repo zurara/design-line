@@ -4,7 +4,7 @@ version: 1
 ledger: _line/ledger.md
 board: ""                        # optional: URL of the published live board (templates/board.html); the dispatcher writes board/state there
 budget:                          # set by /design-line:init from the designer's plan; everything optional is off on a small plan
-  plan: ""                       # pro | max5 | max20 | api | team   (what the designer pays for; drives the defaults below)
+  plan: ""                       # pro | max5 | max20 | api | team | other   (what the designer pays for; drives the defaults below)
   weekly_tokens: 0               # rough subagent-token budget per week, 0 = not tracked; usage-report shows the week's total against it
   board: on                      # on | off   off = no board pushes at all (the files are still the record; render-board.mjs makes a local page)
   parallel: 3                    # tasks the dispatcher runs at once across all lanes

@@ -11,13 +11,14 @@ You are setting up the production line for one designer in one organization. Eve
 
 1. If `_line/lanes.yaml` exists, say so and ask whether to add a lane, redo the designer profile, redo the org profile, or stop. Otherwise create `_line/`, `_line/lanes/`, `_line/rules/` and copy `templates/ledger.md` and `templates/inbox.md` in.
 2. **Designer profile.** Ask, one question at a time, with the template's defaults as the recommended option: language; how they want to be asked (one at a time, drawn first, screenshot scale); what needs their yes (push, PR, publish, planning-tool writes, archiving, rule changes); report shape; model and effort table (offer the default). Write `_line/designer.md` from `templates/designer.md`. Use their words where they gave them.
-2b. **Budget.** Ask which plan the designer is on (Pro, Max 5x, Max 20x, API key, Team) and whether they want a weekly subagent-token budget tracked. Set `budget:` in lanes.yaml from this table and say what you switched off and why; the designer can change any line later:
+2b. **Budget.** Ask which plan the designer is on (Pro, Max 5x, Max 20x, API key, Team, or something else such as a company gateway or another provider's budget) and whether they want a weekly subagent-token budget tracked. Set `budget:` in lanes.yaml from this table and say what you switched off and why; the designer can change any line later:
 
    | plan | board | parallel | readers | default_model | dispatcher |
    | --- | --- | --- | --- | --- | --- |
    | pro | off | 1 | lean | sonnet (opus only for design-tool writers) | not recommended: use `/design-line:line` one task at a time |
    | max5 | on | 2 | on | opus for writers, sonnet elsewhere | small batches, 2 to 3 tasks |
    | max20, api, team | on | 3 | on | the designer.md table | full |
+   | other (not a Claude subscription: another provider's budget, a company gateway) | off | 2 | lean | sonnet-class | small batches; set `weekly_tokens` from that provider's bill and let usage-report keep the count |
 
    Pro users hit the 5-hour window fast with parallel subagents; tell them plainly that one task at a time with small models is the shape that fits, and that the inbox, ledger and handoff still work the same. Write the same facts into designer.md's Budget section.
 
