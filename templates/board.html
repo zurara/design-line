@@ -61,6 +61,22 @@ summary{cursor:pointer;font-weight:600;display:flex;gap:8px;align-items:center}
 summary i{width:10px;height:10px;border-radius:50%;display:inline-block}
 summary .m{font-size:11px;color:var(--ink2);font-weight:400}
 details pre{white-space:pre-wrap;font:12px/1.5 var(--mono);color:var(--ink);margin:8px 0 2px;overflow-wrap:anywhere}
+.card{cursor:pointer}
+.card.open{background:var(--panel)}
+.trace{margin-top:10px;padding-top:10px;border-top:1px solid var(--panel2);display:grid;gap:6px}
+.trace .sum{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);display:flex;gap:12px;flex-wrap:wrap}
+.trace svg{width:100%;height:auto;display:block;overflow:visible}
+.trace .bar{rx:3}
+.trace .bar.reader{fill:#9DB3D1}.trace .bar.writer{fill:#3B82F6}.trace .bar.checker{fill:#22A06B}.trace .bar.coordinator{fill:#1F1F1F}.trace .bar.ledger{fill:#D6A531}.trace .bar.dispatcher{fill:#8A8A8A}
+.trace .bar.paused{fill:none;stroke:#1F1F1F;stroke-width:1.2;stroke-dasharray:3 3}
+.trace .bar.running{opacity:.55}
+.trace .bar.returned{fill-opacity:.45}
+.trace .lbl{font-size:10px;fill:var(--ink2)}
+.trace .ax{stroke:var(--panel2);stroke-width:1}
+.trace .axl{font-size:9.5px;fill:var(--ink3,#B5B5B5)}
+.trace .nowl{stroke:var(--ink);stroke-width:1;stroke-dasharray:2 3}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .trace .bar.coordinator,:root:not([data-theme="light"]) .trace .bar.paused{fill:#E6E6E6;stroke:#E6E6E6}:root:not([data-theme="light"]) .trace .bar.coordinator{fill:#E6E6E6}}
+:root[data-theme="dark"] .trace .bar.coordinator{fill:#E6E6E6}:root[data-theme="dark"] .trace .bar.paused{stroke:#E6E6E6}
 .note{font-size:12px;color:var(--ink2);margin-top:12px}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -84,24 +100,36 @@ details pre{white-space:pre-wrap;font:12px/1.5 var(--mono);color:var(--ink);marg
 const zh=(navigator.language||'').toLowerCase().startsWith('zh');
 const L=zh?{title:'流水线看板',cols:{wait:'等你',queue:'排队',run:'在跑',ready:'等你说出货',done:'做完'},empty:'空',noData:'还没有数据。调度员第一次写 board/state 以后这里会亮。',off:'这个链接看不到数据库。',updated:'更新于',
   roles:{coordinator:'协调',reader:'读',writer:'写',checker:'查',ledger:'账本',dispatcher:'调度',designer:'你'},ws:{queued:'排队',running:'在跑',done:'完',paused:'停下',ready:'等你'},
-  note:'只读。调度员在每个状态变化时写一次 board/state，收工时再写一次。要回答停下的任务，用 Remote Control 进调度员的会话。',blocks:'挡住',lanesH:'每条线挂着的事',inboxFrom:'来自'}
+  note:'只读。调度员在每个状态变化时写一次 board/state，收工时再写一次。要回答停下的任务，用 Remote Control 进调度员的会话。点一张任务卡看它的时间线。',blocks:'挡住',lanesH:'每条线挂着的事',inboxFrom:'来自',tr:{dur:'时长',tok:'token',disp:'派发',now:'现在',min:'分',h:'时',noSpans:'还没有记录到派发'}}
 :{title:'Line board',cols:{wait:'Waiting for you',queue:'Queued',run:'Running',ready:'Ready to ship',done:'Done'},empty:'empty',noData:'No data yet. This lights up after the dispatcher first writes board/state.',off:'Database not reachable from this view.',updated:'updated',
   roles:{coordinator:'coordinate',reader:'read',writer:'write',checker:'check',ledger:'ledger',dispatcher:'dispatch',designer:'you'},ws:{queued:'queued',running:'running',done:'done',paused:'paused',ready:'needs you'},
-  note:'Read-only. The dispatcher writes board/state once per state change and once at close. To answer a paused task, Remote Control into the dispatcher session.',blocks:'blocks',lanesH:'Open items per lane',inboxFrom:'from'};
+  note:'Read-only. The dispatcher writes board/state once per state change and once at close. To answer a paused task, Remote Control into the dispatcher session. Tap a task card for its timeline.',blocks:'blocks',lanesH:'Open items per lane',inboxFrom:'from',tr:{dur:'duration',tok:'tokens',disp:'dispatches',now:'now',min:'min',h:'h',noSpans:'no dispatch recorded yet'}};
 const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 const ICON=r=>`<svg><use href="#i-${['coordinator','reader','writer','checker','ledger','dispatcher','designer'].includes(r)?r:'coordinator'}"/></svg>`;
 $('title').textContent=L.title;document.title=L.title;$('note').textContent=L.note;
 $('legend').innerHTML=Object.entries(L.roles).map(([r,t])=>`<span>${ICON(r)}${esc(t)}</span>`).join('');
-const laneColor={};let activeTag=null,lastDoc=null;
+const laneColor={};let activeTag=null,lastDoc=null;const openTasks=new Set();
+document.addEventListener('click',e=>{const c=e.target.closest('.card[data-task]');if(!c||!c.dataset.task)return;if(e.target.closest('a'))return;const id=c.dataset.task;openTasks.has(id)?openTasks.delete(id):openTasks.add(id);render(lastDoc)});
 const TAG=/#([\p{L}\p{N}_-]+)/gu;const tagsOf=t=>[...String(t||'').matchAll(TAG)].map(m=>m[1]);
-function card(c){const tg=tagsOf(c.title+' '+(c.note||''));return `<div class="card" style="--lc:${laneColor[c.lane]||'var(--l5)'}"><div class="m"><span class="lane">${esc(c.lane)}</span>${tg.map(x=>`<span class="tag">#${esc(x)}</span>`).join('')}${c.meta.map(x=>`<span>${esc(x)}</span>`).join('')}</div><div class="t">${esc(c.title.replace(TAG,'').replace(/\s{2,}/g,' ').trim())}</div>${c.note?`<div class="w">${esc(c.note)}</div>`:''}${c.workers&&c.workers.length?`<div class="workers">${c.workers.map(w=>`<span class="wk ${esc(w.state||'')}" title="${esc(w.note||'')}">${ICON(w.role)}${esc(w.name||L.roles[w.role]||w.role)}<span class="st">${esc(L.ws[w.state]||w.state||'')}</span><span class="s"></span></span>`).join('')}</div>`:''}</div>`}
+function card(c){const tg=tagsOf(c.title+' '+(c.note||''));return `<div class="card${c.spans?' has-trace':''}${openTasks.has(c.id)?' open':''}" data-task="${esc(c.id||'')}" style="--lc:${laneColor[c.lane]||'var(--l5)'}"><div class="m"><span class="lane">${esc(c.lane)}</span>${tg.map(x=>`<span class="tag">#${esc(x)}</span>`).join('')}${c.meta.map(x=>`<span>${esc(x)}</span>`).join('')}</div><div class="t">${esc(c.title.replace(TAG,'').replace(/\s{2,}/g,' ').trim())}</div>${c.note?`<div class="w">${esc(c.note)}</div>`:''}${c.workers&&c.workers.length?`<div class="workers">${c.workers.map(w=>`<span class="wk ${esc(w.state||'')}" title="${esc(w.note||'')}">${ICON(w.role)}${esc(w.name||L.roles[w.role]||w.role)}<span class="st">${esc(L.ws[w.state]||w.state||'')}</span><span class="s"></span></span>`).join('')}</div>`:''}${openTasks.has(c.id)?trace(c):''}</div>`}
+function trace(c){const sp=(c.spans||[]).slice();if(!sp.length)return `<div class="trace"><div class="sum">${esc(L.tr.noSpans)}</div></div>`;
+  const now=Date.now();const t0=Math.min(...sp.map(x=>x.start));const t1=Math.max(now,...sp.map(x=>x.end||now));const W=560,LW=96,RW=W-LW-8,RH=14,GAP=6;
+  const rows=[];const idx={};sp.forEach(x=>{const k=x.name||x.role;if(idx[k]==null){idx[k]=rows.length;rows.push({k,role:x.role,items:[]})}rows[idx[k]].items.push(x)});
+  const H=rows.length*(RH+GAP)+22;const X=t=>LW+((t-t0)/Math.max(1,t1-t0))*RW;
+  const span=t1-t0;const step=span>6*3600e3?3600e3:span>90*60e3?30*60e3:span>20*60e3?10*60e3:5*60e3;const ticks=[];for(let t=Math.ceil(t0/step)*step;t<=t1;t+=step)ticks.push(t);
+  const fmt=t=>{const d=new Date(t);return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`};
+  const tot=sp.reduce((a,x)=>a+(x.tokens||0),0);const dur=Math.round((t1-t0)/60000);
+  return `<div class="trace"><div class="sum"><span>${esc(L.tr.dur)} ${dur>=120?(dur/60).toFixed(1)+' '+L.tr.h:dur+' '+L.tr.min}</span><span>${esc(L.tr.tok)} ${tot>=1000?(tot/1000).toFixed(0)+'k':tot}</span><span>${esc(L.tr.disp)} ${sp.length}</span></div>
+  <svg viewBox="0 0 ${W} ${H}" aria-label="timeline">${ticks.map(t=>`<line class="ax" x1="${X(t)}" x2="${X(t)}" y1="0" y2="${H-18}"/><text class="axl" x="${X(t)}" y="${H-6}" text-anchor="middle">${fmt(t)}</text>`).join('')}
+  ${now<t1+1&&now>t0?`<line class="nowl" x1="${X(now)}" x2="${X(now)}" y1="0" y2="${H-18}"/>`:''}
+  ${rows.map((r,i)=>{const y=i*(RH+GAP);return `<text class="lbl" x="0" y="${y+RH-3}">${esc(r.k.length>14?r.k.slice(0,13)+'…':r.k)}</text>`+r.items.map(x=>{const e=x.end||now;const w=Math.max(3,X(e)-X(x.start));return `<rect class="bar ${esc(x.role)} ${esc(x.state||'')}" x="${X(x.start)}" y="${y}" width="${w}" height="${RH}"><title>${esc(x.name)} · ${esc(L.ws[x.state]||x.state)} · ${x.tokens?Math.round(x.tokens/1000)+'k tok · ':''}${fmt(x.start)}–${x.end?fmt(x.end):L.tr.now}${x.note?' · '+esc(x.note):''}</title></rect>`}).join('')}).join('')}</svg></div>`}
 function col(key,cards){cards=activeTag?cards.filter(c=>tagsOf(c.title+' '+(c.note||'')).includes(activeTag)):cards;return `<section class="col ${key}" id="col-${key}"><h2><i></i>${esc(L.cols[key])}<span class="n">${cards.length}</span></h2><div class="cards">${cards.length?cards.map(card).join(''):`<div class="empty">${esc(L.empty)}</div>`}</div></section>`}
 function render(d){lastDoc=d;
   if(!d){$('board').innerHTML=`<div class="empty" style="grid-column:1/-1">${esc(L.noData)}</div>`;return}
   const tasks=d.tasks||[],inbox=d.inbox||[],ledger=d.ledger||[],lanes=d.lanes||[];
   lanes.forEach((l,i)=>laneColor[l.id]=`var(--l${i%6})`);
   const upd=new Date(d.updated);$('updt').textContent=`${L.updated} ${isNaN(upd)?'':upd.toLocaleString()}`;
-  const T=s=>tasks.filter(t=>t.state===s).map(t=>({lane:t.lane,title:t.title,note:t.note,meta:[t.id,t.updated||t.since||'',t.usage?`${t.usage.tokens>=1000?(t.usage.tokens/1000).toFixed(0)+'k':t.usage.tokens} tok · ${t.usage.models.join('+')}`:''].filter(Boolean),workers:t.workers||[]}));
+  const T=s=>tasks.filter(t=>t.state===s).map(t=>({id:t.id,spans:t.spans,lane:t.lane,title:t.title,note:t.note,meta:[t.id,t.updated||t.since||'',t.usage?`${t.usage.tokens>=1000?(t.usage.tokens/1000).toFixed(0)+'k':t.usage.tokens} tok · ${t.usage.models.join('+')}`:''].filter(Boolean),workers:t.workers||[]}));
   const inboxWait=inbox.filter(i=>(i.blocks&&i.blocks!=='-')||/等你|waiting|paused|needs you/i.test(i.what));
   const inboxRest=inbox.filter(i=>!inboxWait.includes(i));
   const I=arr=>arr.map(i=>({lane:i.lane,title:i.what,note:'',meta:[i.date,(i.blocks&&i.blocks!=='-')?`${L.blocks} ${i.blocks}`:'',i.from?`${L.inboxFrom} ${i.from}`:''].filter(Boolean),workers:[{role:'designer',name:L.roles.designer,state:'paused'}]}));
