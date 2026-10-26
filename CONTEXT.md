@@ -79,6 +79,10 @@ Reads never conflict; every file is plain text. Writes are arranged so that sess
 
 So the practical limit is the number of lanes plus one: for three lanes, three task sessions and a dispatcher. More than one session on the same lane is allowed for reading and parking, not for running tasks.
 
+## Budget
+
+`budget:` in lanes.yaml says what the designer's plan can carry. Roles read it: `board: off` means no board pushes (files remain the record; `render-board.mjs` makes a local page on request); `parallel` caps the dispatcher; `readers: lean` means one reader per task with a 400-word limit instead of one per source; `default_model` is the writer and coordinator model when the lane block does not say. `weekly_tokens` lets `usage-report.mjs` show the week's subagent total against the budget. Nothing in the budget removes a gate, a check, the designer's yes, or the ledger line: those are cheap and are what the line is for.
+
 ## Seeing it from a phone
 
 `lanes.yaml` may name a `board:` URL: a published copy of `templates/board.html` with the `db` capability. It shows one document, `board/state`: waiting for the designer, running, recently done, the inbox, each lane's open items. `scripts/board-snapshot.mjs` builds that document from the files; the dispatcher pushes it with the ArtifactData tool after each state change, and `/design-line:handoff` pushes it at close. Nothing reads from the board, so it can never drift from the files for long, and it costs one write per change. To talk to a running dispatcher from a phone, the designer uses Remote Control on that session.

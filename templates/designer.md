@@ -44,6 +44,12 @@ Who the agents work for and how to behave with them. Every role reads this first
 
 A small model's result that is wrong or incomplete goes back to the same worker once; the second time, re-dispatch on a large model.
 
+## Budget
+
+- Plan: <pro | max5 | max20 | api | team>. Rough weekly budget for subagent tokens: <number or "not tracked">.
+- What is switched off to fit it (mirrors `budget:` in lanes.yaml): board pushes, parallel batches, one reader per source, large default model. Switch things back on when the plan changes.
+- A task that would clearly blow the week's budget is parked in the inbox with a note, not started.
+
 ## Clean-up
 
 - Delete screenshots, scratch installs and servers once results are written; say so in the report.

@@ -24,6 +24,10 @@ A **lane** is one kind of work: a component library, prototypes, a design-tool f
 
 Things come up mid-task. They go into `_line/inbox.md` the moment you say them, one line each, and the task continues. Four cases: blocks the task (becomes a sub-brief now); belongs to another lane (parked for that lane); small (done now, one commit, one ledger line); run in parallel (another writer, another worktree). When a task ends you are asked one thing: which item next, or stop.
 
+## Fits the plan you pay for
+
+`init` asks which plan you are on and sets `budget:` in lanes.yaml: on Pro the board pushes are off, tasks run one at a time on small models, and the dispatcher is not recommended; on Max the batches and the live board come on. Nothing in the budget removes a check, your yes, or the ledger.
+
 ## Walking away
 
 `/design-line:run` loads a batch while you are here (briefs, every decision answered one at a time, whether to ship), then runs each approved task as its own subagent while you are gone, parks anything it cannot answer, and gives you one report when you return. One light resident instead of three heavy ones.
