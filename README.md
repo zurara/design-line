@@ -60,6 +60,7 @@ A **lane** is one place where work ships and is checked: a repo with its gate an
 | Command | When | What it does |
 | --- | --- | --- |
 | `/design-line:init` | First time; adding a lane; a new person | Interviews you one question at a time: preferences, organization, plan and budget, one block per lane. Writes `_line/`. |
+| `/design-line:status` | You do not remember what is pending or where to start | One read-only screen across lanes: waiting for you, running, shipped, inbox, this week's cost, then one question: which thing to start. |
 | `/design-line:line <lane> [task]` | You are here, doing one thing | This session is the task's coordinator: reads the handoff and inbox, dispatches readers, writes the brief, asks your decisions, dispatches writers and checkers, ships as the lane allows, records, asks what is next. Without a task it offers the inbox. |
 | `/design-line:run` | You want to queue several and leave | The dispatcher: loads the batch while you are here (briefs, every decision answered, whether to ship), then runs approved tasks as their own subagents, parallel by worktree, serial on landing. Paused tasks park their question. One report when you return. |
 | `/design-line:park <what>` | Something comes up mid-task | One line into the inbox with lane and whether it blocks; the task continues. Tiny things are done on the spot instead. `park list`, `park done <n>`. |
@@ -68,7 +69,7 @@ A **lane** is one place where work ships and is checked: a repo with its gate an
 | `/design-line:handoff <lane>` | Stopping, or stepping away | Handoff note to the current state, ledger complete, servers you started stopped by port, scratch deleted, board pushed. |
 | `/design-line:playbook [board]` | Learning or teaching it | Explains the shape, roles, inbox, rules and files. `board` refreshes the live board or renders a local one. |
 
-Three to remember: `line` for one thing while you are here, `run` to queue and leave, `park` for what comes up. Say `handoff` when you stop.
+Three to remember: `line` for one thing while you are here, `run` to queue and leave, `park` for what comes up. `status` when you do not know where to start. Say `handoff` when you stop.
 
 Without a command: the inbox is a file you can reorder or tag by hand; the board is a page on your phone; a running dispatcher is reached by Remote Control. Hooks act on their own: the inbox prints when a session starts, force-push and pattern kills are blocked, a ledger line without a handoff update stops the session from ending, and the state is written to a file before every compaction and read back after.
 

@@ -3,7 +3,16 @@
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"; CFG="node $HERE/lib/config.mjs"
 export DESIGN_LINE_HOME="${DESIGN_LINE_HOME:-$(node "$HERE/lib/config.mjs" home 2>/dev/null)}"   # pin the profile for this run and its children, wherever cwd ends up
-LANE="${1:-}"; [ -z "$LANE" ] && { echo "usage: start.sh <lane>"; $CFG lanes; exit 2; }
+LANE="${1:-}"
+if [ -z "$LANE" ]; then   # no lane: everything, one screen
+  ROOT="$($CFG root)" || exit 1; echo "== design-line · all lanes · $(date '+%Y-%m-%d %H:%M')"
+  for l in $($CFG lanes); do HO="$($CFG get "$l" handoff)"; echo; echo "## $l  ($HO)"; [ -f "$HO" ] && sed -n '3p' "$HO" | cut -c1-160; [ -f "$HO" ] && grep -c '^change:' "$HO" | sed 's/^0$//' | sed 's/^\([1-9][0-9]*\)$/   \1 change: line(s) to absorb/'; done
+  echo; echo "## inbox"; [ -f "$ROOT/_line/inbox.md" ] && grep -E '^[0-9]{4}-' "$ROOT/_line/inbox.md" | sed 's/^/   /'
+  echo; echo "## batch"; [ -f "$ROOT/_line/batch.json" ] && bash "$HERE/batch.sh" list | sed 's/^/   /'
+  echo; echo "## ledger tail"; L="$ROOT/$($CFG top ledger)"; [ -f "$L" ] && grep -E '^[0-9]{4}-' "$L" | tail -8 | sed 's/^/   /'
+  echo; node "$HERE/usage-report.mjs" 2>/dev/null | sed -n '1,2p'
+  exit 0
+fi
 HOME_DIR="$($CFG home)" || exit 1
 ROOT="$($CFG root)"
 HANDOFF="$($CFG get "$LANE" handoff)"; REPO="$($CFG get "$LANE" repo)"; MAIN="$($CFG get "$LANE" main)"; PORTS="$($CFG get "$LANE" ports)"

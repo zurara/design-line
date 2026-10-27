@@ -3,7 +3,9 @@ name: line
 description: Start or continue work on one design-line lane as this session's task coordinator. Prints the lane's reality (handoff head, inbox, git, PRs, ports, ledger tail), names the task (given, or the next inbox item), then drives it through the shape: readers, brief, the designer's approval, writers, checkers, ship, record, and asks what is next. Use for any lane work: "work on <lane>", "continue <lane>", "next task on <lane>", "/line <lane> <task>".
 ---
 
-# /design-line:line <lane> [task]
+# /design-line:line [lane] [task]
+
+No lane given: run `/design-line:status` first and take the lane and task the designer picks there.
 
 Read `${CLAUDE_PLUGIN_ROOT}/CONTEXT.md` once. If `lanes.yaml` has a `board:` URL and `budget.board` is not `off`, keep the task on it the way `/design-line:run` does: `scripts/batch.sh set` for the task, `batch.sh worker` for each subagent you dispatch, `board-snapshot.mjs` plus one ArtifactData `update` of `board/state` after each state change. Then act as the `line-coordinator` role for this one task, in this session (do not dispatch a coordinator subagent for it; dispatch readers, writers and checkers).
 
