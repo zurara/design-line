@@ -28,7 +28,7 @@ English: [README.md](README.md)
 | 分支落地 | 你合，或者 agent 想起来就合 | 合并队列：在合并后的树上过门禁，不 force push，冲突退回 writer |
 | push、开 PR、发布 | 看 agent 记不记得 | hook 直接拦 force push 和按名字杀进程；哪条线要谁点头写在配置里 |
 | 花了多少 | `/cost` 一个总数 | 每个 subagent 的模型、token、结果；每个任务一条「下次怎么做」 |
-| 不在电脑前看进度 | 没有 | 手机上一张只读看板，状态变化时更新 |
+| 看进度 | `/cost` 和翻聊天记录 | 一个每次状态变化重新生成的 kanban 文件，每个任务有时间线 |
 
 ### 代价
 
@@ -89,9 +89,9 @@ English: [README.md](README.md)
 
 `init` 会问你是哪个 plan（Pro、Max、API、Team，或者别的），写进 lanes.yaml 的 `budget:`。Pro 关掉看板推送、一次一件、小模型、不建议用调度员；Max 开批量和实时看板。预算不动的东西：检查、你的点头、账本。
 
-## 手机上看
+## 看板
 
-把 `templates/board.html` 发布成一个带 `db` 能力的 artifact，地址填进 lanes.yaml 的 `board:`。调度员和 `handoff` 在每次状态变化时推一个文档：等你、排队、在跑、等你说出货、做完，每张卡下面一排 subagent 图标。点一张卡看它的时间线：每次派发一条杠，按角色上色，停下的虚线，返工的半透明。要在手机上回答停下的任务，用 Remote Control 进调度员的会话。
+`_line/board.html` 是一个普通文件，每次状态变化重新生成：kanban 五栏（等你、排队、在跑、等你说出货、做完），每张卡下面一排 subagent 图标，点一张卡看它的时间线（每次派发一条杠，按角色上色，停下的虚线，返工的半透明）。浏览器打开，重新载入就是最新的。没有服务、没有数据库、不用推。手机上看是可选的（把模板发布成 artifact，填 `board:` 并把 `budget.board` 设成 on）。要在手机上回答停下的任务，用 Remote Control 进调度员的会话。
 
 ## 花了多少，下次怎么做
 
@@ -110,7 +110,8 @@ _line/
   rules/               你的设计规则和每条线的默认做法
   lanes/<id>/notes.md     可选：你给这条线定的规矩、新来的人要知道的
   lanes/<id>/briefs/      一个任务一份 brief
-  board.json           最后一次推给看板的快照
+  board.json           最后一次快照；board.html 由它生成
+  board.html           kanban，一个普通文件，重新载入就是最新的
 ```
 
 ## 安装

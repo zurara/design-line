@@ -10,5 +10,5 @@ description: Close out a design-line session cleanly: every shipped thing has a 
 3. Anything the designer said this session that is not done and not in the inbox: park it now.
 4. The lane's `notes:` file, if the designer set a new rule for the lane this session: one dated line.
 5. `${CLAUDE_PLUGIN_ROOT}/scripts/ports.sh list <lane>`; stop the ones this session started, by port. Never the designer's own server (org.md names its port). Delete scratch worktrees, screenshots and temporary installs you created.
-6. If `lanes.yaml` has a `board:` URL and `budget.board` is not `off`: `node ${CLAUDE_PLUGIN_ROOT}/scripts/board-snapshot.mjs` and push it with ArtifactData `update` (`board` / `state`, `file_path` `_line/board.json`, `if_version` as last read).
+6. `node ${CLAUDE_PLUGIN_ROOT}/scripts/render-board.mjs` so `_line/board.html` shows the closing state. If `lanes.yaml` has a `board:` URL and `budget.board` is `on`, also push `_line/board.json` with ArtifactData `update` (`board` / `state`, `if_version` as last read).
 7. Report in three lines: what shipped, what waits for the designer, what is next in the inbox.

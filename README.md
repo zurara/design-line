@@ -28,7 +28,7 @@ A production line for design work run through Claude Code. One pipeline shape, i
 | Branches landing | You merge, or the agent does when it feels like it | A merge queue: gate on the merged tree, no force push, conflicts go back to the writer |
 | Pushing, PRs, publishing | Depends on the agent remembering | Hooks block force-push and pattern kills; the lane says whose yes is needed |
 | What it cost | `/cost`, one number | Per subagent: model, tokens, outcome; a "next time" direction per task |
-| Seeing progress away from the desk | Nothing | A read-only kanban on your phone, updated at state changes |
+| Seeing progress | `/cost` and scrollback | A kanban file regenerated at each state change, with a timeline per task |
 
 ### The costs
 
@@ -89,9 +89,9 @@ Things come up mid-task. They go into `_line/inbox.md` the moment you say them, 
 
 `init` asks which plan you are on (Pro, Max, API, Team, or something else) and sets `budget:` in lanes.yaml. On Pro the board pushes are off, tasks run one at a time on small models, and the dispatcher is not recommended. On Max the batches and the live board come on. Nothing in the budget removes a check, your yes, or the ledger.
 
-## Seeing it from a phone
+## The board
 
-Publish `templates/board.html` once as an artifact with the `db` capability and put its URL in `lanes.yaml` as `board:`. The dispatcher and `handoff` push one document to it at each state change: waiting for you, queued, running, ready to ship, done, with each task's subagents as an icon row. Tap a card for its timeline: one bar per dispatch, by role, paused dashed, rework faded. To answer a paused task from the phone, Remote Control into the dispatcher session.
+`_line/board.html` is one plain file, regenerated at each state change: a kanban with waiting for you, queued, running, ready to ship, done, each task's subagents as an icon row, and a timeline per task when you tap a card (one bar per dispatch, by role, paused dashed, rework faded). Open it in a browser and reload. No service, no database, nothing to push. A phone-reachable copy is optional (publish the template as an artifact and set `board:` plus `budget.board: on`). To answer a paused task from a phone, Remote Control into the dispatcher session.
 
 ## What it cost, and what to try next time
 
@@ -110,7 +110,8 @@ _line/
   rules/               your design rules and each lane's defaults
   lanes/<id>/notes.md     optional: rules the designer set for this lane, things a newcomer must know
   lanes/<id>/briefs/      one brief per task
-  board.json           the last snapshot pushed to the live board
+  board.json           the last snapshot; board.html is rendered from it
+  board.html           the kanban, one plain file, reload to refresh
 ```
 
 ## Install
