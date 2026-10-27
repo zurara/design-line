@@ -42,7 +42,7 @@ read ──▶ brief ──▶ [designer approves] ──▶ write ──▶ che
 - **brief**: the coordinator writes one brief per task (`templates/brief.md`), with `status: draft`.
 - **approve**: the designer answers the numbered decisions. Only then `status: approved`. "OK, go on" moves work forward; it is not a choice between options.
 - **write**: one writer per worktree. Writers that touch the same files run one after another. A writer that meets a question the brief does not answer **stops before deciding** and hands it back; it never asks the designer and never "does it first and lists it after". A task whose writer stopped is `paused`, never `done`. Each lane may name a `defaults:` file (known unknowns and what to do without asking); a case it covers is not a question.
-- **check**: a checker runs the lane's gate and takes light and dark screenshots the moment a writer returns. It fixes nothing.
+- **check**: a checker runs the lane's gate and measures the brief's numbers in the DOM the moment a writer returns; screenshots only for what the brief marks for the designer's eyes or what a measurement cannot decide, capped by `budget.max_shots`. It fixes nothing.
 - **ship**: what `ship.mode` says: open a PR, merge, publish, or nothing. `ship.approval: designer` means the designer must say so in the current conversation; relayed consent from another session does not count.
 - **record**: append one line to `_line/ledger.md`; update the handoff note at milestones; keep briefs with the task.
 

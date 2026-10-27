@@ -18,7 +18,8 @@ Files or parts. For each: where it lives, what it becomes. Name the worktree.
 ## 3. Done means
 
 - The gate the lane defines passes (command and expected result).
-- Light and dark screenshots of: …
+- Numbers the checker measures (DOM, light and dark): …
+- The designer wants to see (screenshots, few): … (leave empty when a passing gate and the numbers are enough)
 - …
 
 ## 4. Decisions for the designer

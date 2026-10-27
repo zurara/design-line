@@ -52,7 +52,7 @@ A **lane** is one place where work ships and is checked: a repo with its gate an
 | `line-coordinator` (the session) | read everything, write the brief, dispatch, ship as the lane allows, record | push / PR / publish without your yes where the lane says so |
 | `line-reader` | read code, design files, planning pages; return bounded tables | edit, install, build, commit, write anywhere |
 | `line-writer` | write in one worktree from an approved brief, commit | push, merge, publish, ask you, decide what the brief left open, touch shared files |
-| `line-checker` | run the gate, measure light and dark, screenshot | fix anything |
+| `line-checker` | run the gate, measure the brief's numbers in the DOM, screenshot only what the brief marks for your eyes | fix anything |
 | `line-ledger` (optional) | reconcile what shipped with your planning tool, draft proposals | write there without your yes |
 
 ## Commands

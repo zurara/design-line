@@ -52,7 +52,7 @@ English: [README.md](README.md)
 | `line-coordinator`（会话本身） | 读一切、写 brief、派活、按线的规则出货、记录 | 线说要你点头的 push / PR / 发布，没点头就做 |
 | `line-reader` | 读代码、设计文件、计划页面，回有字数上限的表 | 改、装、build、提交、往任何地方写 |
 | `line-writer` | 照批准的 brief 在一个 worktree 里写、提交 | push、合并、发布、问你、替 brief 没写的事做决定、碰共用文件 |
-| `line-checker` | 跑门禁、量亮暗两套、截图 | 改任何东西 |
+| `line-checker` | 跑门禁、在 DOM 里量 brief 的数字、只截 brief 标了要你看的 | 改任何东西 |
 | `line-ledger`（可选） | 把真做了的对上计划工具、起草提案 | 没你点头就写进去 |
 
 ## 指令

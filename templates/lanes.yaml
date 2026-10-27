@@ -12,6 +12,7 @@ budget:                          # set by /design-line:init from the designer's 
                                  #   fold = the coordinator reads the sources itself (bounded, no reader subagent); fewer handoffs, nothing lost in a summary
                                  #   lean = one reader per task, 400 words;  on = one reader per source. Compare with usage-report.mjs (it groups by this setting)
   default_model: opus            # the writer/coordinator model when a lane does not say; a small plan sets sonnet
+  max_shots: 8                   # screenshots a checker may take per check; gate and DOM measurements are the normal proof, pictures only for what the brief marks for the designer's eyes
 trailer: "Co-Authored-By: Claude <noreply@anthropic.com>"   # default for merge commits; a session sets DESIGN_LINE_TRAILER to the line for the model it actually runs on
 
 lanes:
