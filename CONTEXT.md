@@ -106,6 +106,10 @@ Every subagent dispatch is recorded in `_line/usage.tsv` (`scripts/usage.sh add 
 
 Two levels at most: a session (or the dispatcher) and the workers it dispatches. A dispatcher does not dispatch coordinators that dispatch workers; for a batch it either dispatches writers and checkers itself per task, or runs `/design-line:line` for each task in turn. Three levels made the first batch hand back interim reports and lose the thread.
 
+## After shipping, and after the designer reviews
+
+`line-auditor` compares the live product with its design source (design-tool node, prototype page or brief): DOM numbers first, a screenshot overlay only where a number cannot settle it. It files nothing; its findings become inbox lines with a verdict each (`product` deviates, `design` is stale, or the designer decides). `/design-line:audit` drives it, and ends with the lane's after-review step when the lane's rules define one (a prototype lane records the designer's acceptance as the flow's status, moved by one commit only after she says so).
+
 ## Interim reports
 
 A coordinator that is asked to report while its own subagents are still running labels the report `interim` in its first line and says which agents are still out. The caller treats an interim report as a checkpoint, not a result, and sends the agent back with SendMessage. Nothing is recorded as done, and no ledger line is written, from an interim report.

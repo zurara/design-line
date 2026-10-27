@@ -54,6 +54,7 @@ A **lane** is one place where work ships and is checked: a repo with its gate an
 | `line-writer` | write in one worktree from an approved brief, commit | push, merge, publish, ask you, decide what the brief left open, touch shared files |
 | `line-checker` | run the gate, measure the brief's numbers in the DOM, screenshot only what the brief marks for your eyes | fix anything |
 | `line-ledger` (optional) | reconcile what shipped with your planning tool, draft proposals | write there without your yes |
+| `line-auditor` (optional) | measure the live product against the design: DOM numbers, overlay only where needed; verdict per finding | change anything, file anything |
 
 ## Commands
 
@@ -67,6 +68,7 @@ A **lane** is one place where work ships and is checked: a repo with its gate an
 | `/design-line:brief <lane> <task>` | A brief by itself; recording a result | Fixed shape: goal, changes, done means, numbered decisions (Q1…), not in this task, lane defaults. `approve` only when every decision is answered. `result` fills what writers and checkers returned. |
 | `/design-line:merge <lane> <branch>` | A checked branch, landing it now | Throwaway worktree, `--no-ff`, the gate on the merged tree (with the server it needs), push, deploy check by commit, ledger line. Refuses on PR lanes. |
 | `/design-line:handoff [lane]` | Stopping, or stepping away | Ledger complete, every brief's status true and the inbox matching, servers you started stopped by port, scratch deleted, board pushed. No note to write. |
+| `/design-line:audit <page> <design>` | A developer shipped; before closing a work item; after you review a flow; a periodic sweep | Fidelity check of the live product against the design-tool node, prototype or brief: numbers first, overlay only where needed; findings parked per lane with a verdict (product wrong, design stale, your call); then the lane's after-review step, such as moving a prototype flow's status, only on your yes. |
 | `/design-line:playbook [board]` | Learning or teaching it | Explains the shape, roles, inbox, rules and files. `board` refreshes the live board or renders a local one. |
 
 Three to remember: `line` for one thing while you are here, `run` to queue and leave, `park` for what comes up. `status` when you do not know where to start. Say `handoff` when you stop.

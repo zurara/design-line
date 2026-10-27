@@ -54,6 +54,7 @@ English: [README.md](README.md)
 | `line-writer` | 照批准的 brief 在一个 worktree 里写、提交 | push、合并、发布、问你、替 brief 没写的事做决定、碰共用文件 |
 | `line-checker` | 跑门禁、在 DOM 里量 brief 的数字、只截 brief 标了要你看的 | 改任何东西 |
 | `line-ledger`（可选） | 把真做了的对上计划工具、起草提案 | 没你点头就写进去 |
+| `line-auditor`（可选） | 拿线上产品对设计量还原度：先量 DOM，量不了的才叠图；每条发现给一个判定 | 改任何东西、提任何单 |
 
 ## 指令
 
@@ -67,6 +68,7 @@ English: [README.md](README.md)
 | `/design-line:brief <线> <任务>` | 单独写一份 brief；记录结果 | 固定格式：目标、改什么、怎样算做完、编号决定（Q1…）、不做什么、这条线的默认做法。`approve` 要所有决定都答了。`result` 填 writer 和 checker 交回的。 |
 | `/design-line:merge <线> <分支>` | 一条过了检查的分支，现在合 | 一次性 worktree、`--no-ff`、在合并后的树上过门禁（带它要的服务器）、push、按 commit 查部署、记账本。PR 出货的线会拒绝。 |
 | `/design-line:handoff [线]` | 收工，或离开一阵 | 账本补齐，每份 brief 的状态是真的、收件箱对得上，自己开的服务器按端口关，删 scratch，推看板。不用写笔记。 |
+| `/design-line:audit <页面> <设计>` | 开发上线了；关工作项之前；你走查完一条 flow；定期扫一遍 | 线上产品对 Figma 节点、原型页或 brief 的还原度：先量数字，量不了的才叠图；每条发现按线进收件箱，带判定（产品错、设计过时、你定）；最后做这条线的「审核后」一步，比如原型 flow 改状态，只在你点头后。 |
 | `/design-line:playbook [board]` | 学它或教别人 | 讲形状、角色、收件箱、规则、文件。`board` 刷新看板或本地生成一页。 |
 
 记三个就够：`line` 是坐着做一件，`run` 是排一批走开，`park` 是中途想到的塞进去。不知道从哪开始就 `status`。收工说 `handoff`。

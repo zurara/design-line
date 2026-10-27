@@ -1,0 +1,12 @@
+---
+name: audit
+description: Check how faithfully the live product reproduces the design: numbers from the DOM against the design-tool node, prototype page or brief, with a screenshot overlay only where composition cannot be measured. Produces a findings table with a verdict per item (product wrong, design stale, or the designer's call), parks the findings as inbox lines for the lane that owns each one, and runs the lane's after-review step (for a prototype lane, moving the flow's status) once the designer accepts. Use after a developer ships a feature, before a work item is closed, after the designer walks through a flow, or for a periodic sweep. Trigger words: "还原度", "走查", "check what shipped", "audit the build", "compare prod with Figma", "fidelity".
+---
+
+# /design-line:audit <live page or flow> <design source> [viewports]
+
+1. Read `_line/org.md` for the product URL, the test account and feature flags; read the brief or ledger lines for the feature so the auditor knows which decisions moved the design after it was drawn.
+2. Dispatch `line-auditor` (the lane's reader model, medium) with: the live page and steps, the design source (file key and node ids, or a prototype page and step, or the brief), the viewports, the list of items to compare, and `budget.max_shots`. If the design source is a design-tool file and the auditor has no design-tool tools, dispatch a `line-reader` for the spec numbers first and pass its table.
+3. Take the findings table. For each finding: verdict `product` becomes an inbox line for the lane that files developer issues (usually the ledger lane), one line per finding, with the evidence path; verdict `design` becomes an inbox line for the design lane (update the file or prototype); verdict `unclear` becomes a numbered question for the designer, asked one at a time.
+4. **After-review step, per lane.** Some lanes record the designer's acceptance in the artifact itself; the lane's rules file says what and how (a prototype lane: the flow's `status` in its `project.json`, `unreviewed` → `reviewed` → `ready` → `frozen`, changed by one commit on the project branch). Ask the designer once, "accept and move the status?", and only on yes dispatch a `line-writer` for that single commit, then ship it the lane's way. Never move a status on your own reading of the findings.
+5. Record one ledger line: what was audited, items checked and passed, where the findings went, which status moved. Report in the designer's shape: the table, the three counts, the questions.
