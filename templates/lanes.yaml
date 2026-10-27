@@ -49,8 +49,8 @@ lanes:
         model: sonnet
         effort: medium
       writer:
-        model: opus
-        effort: high
+        model: sonnet                 # the default; a brief marks `writer_model: opus` for new behaviour, a new component, drawing in a design tool, or work the designer iterates on
+        effort: medium
       checker:
         model: sonnet
         effort: medium
@@ -88,8 +88,8 @@ lanes:
         model: sonnet
         effort: medium
       writer:
-        model: opus
-        effort: high
+        model: sonnet
+        effort: medium
       checker:
         model: sonnet
         effort: medium

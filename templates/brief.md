@@ -3,6 +3,7 @@ lane: <lane id>
 task: <short task id>
 status: draft        # draft → approved (all decisions answered) → done; paused = work stopped on a question the brief did not answer (Result may be filled)
 written: <YYYY-MM-DD>
+writer_model: sonnet # sonnet unless this task is new behaviour, a new component, drawing in a design tool, or something the designer will iterate on: then opus
 ---
 
 # Brief: <task name>
@@ -13,7 +14,7 @@ One sentence.
 
 ## 2. What changes
 
-Files or parts. For each: where it lives, what it becomes. Name the worktree.
+Files or parts. For each: where it lives, what it becomes, and for a file over 800 lines the line ranges to touch (writers read ranges, not whole files). Name the worktree.
 
 ## 3. Done means
 

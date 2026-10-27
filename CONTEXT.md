@@ -120,7 +120,7 @@ Only the coordinator of the lane that is blocked asks. Every question carries a 
 
 ## Choosing models
 
-Use the table in `_line/designer.md` (the template has a default). Reading, measuring, mechanical edits: a small model, medium effort. New components, flows, drawing in a design tool: a large model, high effort. Open design or architecture problems: the largest effort. A small model's result that is wrong or incomplete goes back to the same worker once; the second time, re-dispatch on a larger model.
+Use the table in `_line/designer.md` (the template has a default). Writers run on a small model unless the brief says `writer_model: opus`, which the coordinator sets for new behaviour, a new component, drawing in a design tool, or work the designer will iterate on. Reading, measuring, mechanical edits: a small model, medium effort. The first week of usage data: large-model writers were 68% of all subagent tokens and only 54% of their runs came back clean, mostly because they kept working past an open question; the model was not what made them expensive. Open design or architecture problems: the largest effort. A small model's result that is wrong or incomplete goes back to the same worker once; the second time, re-dispatch on a larger model.
 
 ## Never
 
