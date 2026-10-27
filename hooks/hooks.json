@@ -1,5 +1,5 @@
 {
-  "description": "design-line guards: a one-screen start, a block on force-push and pattern kills, a reminder to write the handoff note when the ledger moved, and lossless compaction (state written before, printed after).",
+  "description": "design-line guards: a one-screen start, a block on force-push and pattern kills, a reminder to close out when the ledger moved, and lossless compaction (state written before, printed after).",
   "hooks": {
     "SessionStart": [
       {

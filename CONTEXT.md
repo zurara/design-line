@@ -24,7 +24,7 @@ The profile folder is named `_line/`. Look for it in `$DESIGN_LINE_HOME`, else w
 1. `_line/designer.md` — how to speak to this designer and what needs their yes.
 2. `_line/org.md` — the world this work lives in.
 3. `_line/lanes.yaml` — the lane you are on.
-4. The lane's handoff note (`handoff:` in its block), then `_line/inbox.md` (items for this lane, and anything marked `blocks:` the task at hand). A `change:` line in the note's head means a resident session is expected to catch up; if you are that session, do it and delete the lines.
+4. `_line/inbox.md` (items for this lane, waiting-for-others lines, and anything marked `blocks:` the task at hand), the lane's `notes:` file if it has one, and the briefs under `lanes/<id>/briefs/` whose status is not `done`.
 5. The lane's `rules:` files, whole, before the first edit (writers quote the last line of each in their report to prove they read it).
 6. `_line/ledger.md`, the tail, to see what shipped recently.
 
@@ -44,7 +44,7 @@ read ──▶ brief ──▶ [designer approves] ──▶ write ──▶ che
 - **write**: one writer per worktree. Writers that touch the same files run one after another. A writer that meets a question the brief does not answer **stops before deciding** and hands it back; it never asks the designer and never "does it first and lists it after". A task whose writer stopped is `paused`, never `done`. Each lane may name a `defaults:` file (known unknowns and what to do without asking); a case it covers is not a question.
 - **check**: a checker runs the lane's gate and measures the brief's numbers in the DOM the moment a writer returns; screenshots only for what the brief marks for the designer's eyes or what a measurement cannot decide, capped by `budget.max_shots`. It fixes nothing.
 - **ship**: what `ship.mode` says: open a PR, merge, publish, or nothing. `ship.approval: designer` means the designer must say so in the current conversation; relayed consent from another session does not count.
-- **record**: append one line to `_line/ledger.md`; update the handoff note at milestones; keep briefs with the task.
+- **record**: append one line to `_line/ledger.md`; keep the brief's status true; keep briefs with the task. There is no separate status note to maintain: the inbox is what is pending, the briefs are what is in progress, the ledger is what shipped.
 
 ## The ledger
 
@@ -58,9 +58,7 @@ Columns: time, lane, external item id or `-`, what happened, commit or link. Any
 
 ## Sessions are per task, state is in files
 
-There is no resident coordinator session. A session opens for one task, acts as that task's coordinator (brief, dispatch, check, ship, record), and ends. Everything the next session needs is in files: the lane's handoff note, `_line/inbox.md`, `_line/ledger.md`, and the task's brief. The fixed context is paid once per task, not once per message.
-
-Whoever changes state updates the handoff note at the milestone. If the designer chooses to keep one long-running session for a lane (optional), other sessions that touch that lane add a line `change: {MM-DD HH:MM} · {who} · {what}` under "Last updated" so the resident session can catch up and delete it. Nobody writes dashboards; boards are rendered from the files (`scripts/render-board.mjs`), read-only.
+There is no resident coordinator session. A session opens for one task, acts as that task's coordinator (brief, dispatch, check, ship, record), and ends. Everything the next session needs is in files: `_line/inbox.md`, `_line/ledger.md`, the task's brief, the lane's rules and optional notes. The fixed context is paid once per task, not once per message. Nobody writes dashboards by hand; the board is rendered from the files.
 
 ## Batches: several tasks while the designer is away
 
@@ -73,7 +71,7 @@ Reads never conflict; every file is plain text. Writes are arranged so that sess
 - Append-only files (`ledger.md`, `usage.tsv`) and the inbox `add` take any number of writers.
 - `batch.json` and inbox `done` are read-modify-write; the scripts take a short lock (`_line/.lock-*`), so two sessions may call them at once. A stale lock directory left by a crashed session is removed by hand.
 - The board document is pinned by version: when an ArtifactData `update` reports a version conflict, re-run `board-snapshot.mjs` and update again with the version it names. The snapshot is built from files, so nothing is lost.
-- A lane's handoff note has one writer at a time: **run at most one session per lane**, plus optionally one dispatcher. A second session on the same lane only adds `change:` lines, never rewrites sections. The dispatcher's subagents count as its session.
+- A brief has one writer at a time, and a lane's `notes:` file too: **run at most one session per lane**, plus optionally one dispatcher. The dispatcher's subagents count as its session.
 - `main` is protected by the merge script: it refuses to push when `origin/main` moved under it; the loser re-runs. Two sessions may land branches on the same repo; they just take turns.
 - Ports: a checker calls `ports.sh list <lane>` and takes a free one; two checkers on one lane need two free ports in `lanes.yaml`.
 
@@ -91,7 +89,7 @@ So the practical limit is the number of lanes plus one: for three lanes, three t
 
 `_line/inbox.md` is one list every session reads at start and writes the moment something new is said. One line per item: `date | lane | what | blocks: <task id or -> | from`. Four cases, each with one fixed move:
 
-1. **Blocks the current task**: it becomes a sub-brief of the current task in the same session. If it is large, write the handoff note first, do it, come back.
+1. **Blocks the current task**: it becomes a sub-brief of the current task in the same session. If it is large, write the notes file first, do it, come back.
 2. **Belongs to another lane**: write it to the inbox with that lane's id. The next session on that lane picks it up. No message to anyone.
 3. **Small** (one color, one line of copy): do it now, one commit, one ledger line. It never enters the inbox.
 4. **Should run now in parallel and does not block**: dispatch a writer to another worktree from this session, or the designer opens a second session. The designer keeps talking to this one.

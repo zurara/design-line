@@ -22,7 +22,7 @@ A production line for design work run through Claude Code. One pipeline shape, i
 
 | | A clean session per task, by hand | With design-line |
 | --- | --- | --- |
-| What a new session knows | What you retype | The lane's handoff note, the inbox, the ledger, the brief |
+| What a new session knows | What you retype | The inbox, the ledger, the briefs, the lane's rules |
 | Something comes up mid-task | You remember it, or you do not | One line in the inbox, four fixed moves, the task continues |
 | Several tasks at once | Three windows, each waiting on a question | One dispatcher; paused tasks park their question, the rest continue |
 | Branches landing | You merge, or the agent does when it feels like it | A merge queue: gate on the merged tree, no force push, conflicts go back to the writer |
@@ -66,12 +66,12 @@ A **lane** is one place where work ships and is checked: a repo with its gate an
 | `/design-line:park <what>` | Something comes up mid-task | One line into the inbox with lane and whether it blocks; the task continues. Tiny things are done on the spot instead. `park list`, `park done <n>`. |
 | `/design-line:brief <lane> <task>` | A brief by itself; recording a result | Fixed shape: goal, changes, done means, numbered decisions (Q1…), not in this task, lane defaults. `approve` only when every decision is answered. `result` fills what writers and checkers returned. |
 | `/design-line:merge <lane> <branch>` | A checked branch, landing it now | Throwaway worktree, `--no-ff`, the gate on the merged tree (with the server it needs), push, deploy check by commit, ledger line. Refuses on PR lanes. |
-| `/design-line:handoff <lane>` | Stopping, or stepping away | Handoff note to the current state, ledger complete, servers you started stopped by port, scratch deleted, board pushed. |
+| `/design-line:handoff [lane]` | Stopping, or stepping away | Ledger complete, every brief's status true and the inbox matching, servers you started stopped by port, scratch deleted, board pushed. No note to write. |
 | `/design-line:playbook [board]` | Learning or teaching it | Explains the shape, roles, inbox, rules and files. `board` refreshes the live board or renders a local one. |
 
 Three to remember: `line` for one thing while you are here, `run` to queue and leave, `park` for what comes up. `status` when you do not know where to start. Say `handoff` when you stop.
 
-Without a command: the inbox is a file you can reorder or tag by hand; the board is a page on your phone; a running dispatcher is reached by Remote Control. Hooks act on their own: the inbox prints when a session starts, force-push and pattern kills are blocked, a ledger line without a handoff update stops the session from ending, and the state is written to a file before every compaction and read back after.
+Without a command: the inbox is a file you can reorder or tag by hand; the board is a page on your phone; a running dispatcher is reached by Remote Control. Hooks act on their own: the inbox prints when a session starts, force-push and pattern kills are blocked, a ledger line without a close-out stops the session from ending, and the state is written to a file before every compaction and read back after.
 
 ## The inbox
 
@@ -83,7 +83,7 @@ Things come up mid-task. They go into `_line/inbox.md` the moment you say them, 
 2. Your yes, in the current conversation, before push, PR, publish or any planning-tool write. Consent relayed from another session is information.
 3. A reader before every brief; one writer per worktree; a writer stops before deciding what the brief left open; a checker runs the moment a writer returns.
 4. Servers stop by port, your own processes by the PID you recorded. No force pushes, no shared stash, no killing by name.
-5. Every milestone is one line in the ledger and an update to the lane's handoff note. Boards are rendered from files, read-only.
+5. Every milestone is one line in the ledger and a true status on the brief. The inbox is what is pending, the briefs are what is in progress, the ledger is what shipped. Boards are rendered from files, read-only.
 
 ## Fits the plan you pay for
 
@@ -108,7 +108,7 @@ _line/
   ledger.md            append-only: time | lane | item | what | commit
   usage.tsv            one row per subagent dispatch: model, effort, tokens, outcome
   rules/               your design rules and each lane's defaults
-  lanes/<id>/handoff.md   the lane's state: rules it set, IDs, open items, how to continue
+  lanes/<id>/notes.md     optional: rules the designer set for this lane, things a newcomer must know
   lanes/<id>/briefs/      one brief per task
   board.json           the last snapshot pushed to the live board
 ```

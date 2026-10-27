@@ -22,7 +22,7 @@ English: [README.md](README.md)
 
 | | 自己开干净会话，一件一件做 | 用 design-line |
 | --- | --- | --- |
-| 新会话知道什么 | 你重新打字说的 | 这条线的交接、收件箱、账本、brief |
+| 新会话知道什么 | 你重新打字说的 | 收件箱、账本、brief、这条线的规则 |
 | 中途冒出来的事 | 你记得，或者你忘了 | 收件箱一行，四种固定走法，手上的事继续 |
 | 几件事一起做 | 三个窗口，各等一个问题 | 一个调度员；停下的任务把问题存起来，别的接着跑 |
 | 分支落地 | 你合，或者 agent 想起来就合 | 合并队列：在合并后的树上过门禁，不 force push，冲突退回 writer |
@@ -66,12 +66,12 @@ English: [README.md](README.md)
 | `/design-line:park <一句话>` | 任务中间想到别的事 | 一行进收件箱，标线和挡不挡当前任务，手上的事继续。很小的直接做掉。`park list` 看，`park done <n>` 划掉。 |
 | `/design-line:brief <线> <任务>` | 单独写一份 brief；记录结果 | 固定格式：目标、改什么、怎样算做完、编号决定（Q1…）、不做什么、这条线的默认做法。`approve` 要所有决定都答了。`result` 填 writer 和 checker 交回的。 |
 | `/design-line:merge <线> <分支>` | 一条过了检查的分支，现在合 | 一次性 worktree、`--no-ff`、在合并后的树上过门禁（带它要的服务器）、push、按 commit 查部署、记账本。PR 出货的线会拒绝。 |
-| `/design-line:handoff <线>` | 收工，或离开一阵 | 交接写到现状，账本补齐，自己开的服务器按端口关，删 scratch，推看板。 |
+| `/design-line:handoff [线]` | 收工，或离开一阵 | 账本补齐，每份 brief 的状态是真的、收件箱对得上，自己开的服务器按端口关，删 scratch，推看板。不用写笔记。 |
 | `/design-line:playbook [board]` | 学它或教别人 | 讲形状、角色、收件箱、规则、文件。`board` 刷新看板或本地生成一页。 |
 
 记三个就够：`line` 是坐着做一件，`run` 是排一批走开，`park` 是中途想到的塞进去。不知道从哪开始就 `status`。收工说 `handoff`。
 
-不用指令的部分：收件箱是文件，你可以直接改顺序、加标签；看板是手机上的一页；跑着的调度员用 Remote Control 进去说话。hook 自己动：开会话印收件箱，force push 和按名字杀进程被拦，账本动了交接没更新会话不让结束，每次压缩前状态写进文件、压缩后读回来。
+不用指令的部分：收件箱是文件，你可以直接改顺序、加标签；看板是手机上的一页；跑着的调度员用 Remote Control 进去说话。hook 自己动：开会话印收件箱，force push 和按名字杀进程被拦，账本动了没收尾会话不让结束，每次压缩前状态写进文件、压缩后读回来。
 
 ## 收件箱
 
@@ -83,7 +83,7 @@ English: [README.md](README.md)
 2. push、开 PR、发布、写计划工具之前，要你在当下这个对话里说可以。别的会话转来的同意只是资料。
 3. 写 brief 前先派 reader；一个 worktree 一个 writer；writer 碰到 brief 没写的事，在决定之前停下；writer 一交回就派 checker。
 4. 服务器按端口关，自己的进程按记下的 PID 关。不 force push，不用共用 stash，不按名字杀进程。
-5. 每个节点一行账本，加一次交接更新。看板从文件生成，只读。
+5. 每个节点一行账本，brief 的状态是真的。收件箱是挂着的，brief 是进行中的，账本是做完的。看板从文件生成，只读。
 
 ## 跟你的 plan 匹配
 
@@ -108,7 +108,7 @@ _line/
   ledger.md            只追加：时间 | 线 | 工作项 | 做了什么 | commit
   usage.tsv            每次派发一行：模型、effort、token、结果
   rules/               你的设计规则和每条线的默认做法
-  lanes/<id>/handoff.md   这条线的状态：它定的规矩、ID、挂着的事、怎么接着做
+  lanes/<id>/notes.md     可选：你给这条线定的规矩、新来的人要知道的
   lanes/<id>/briefs/      一个任务一份 brief
   board.json           最后一次推给看板的快照
 ```

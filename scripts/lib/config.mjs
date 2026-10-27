@@ -119,6 +119,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     const v = dig(L, b || '.');
     if (v == null) console.log('');
     else if (typeof v === 'object') console.log(JSON.stringify(v));
-    else console.log(['repo', 'handoff'].includes(b) || (b || '').endsWith('.path') ? expand(v, cfg._root) : v);
+    else console.log(['repo', 'handoff', 'notes', 'defaults'].includes(b) || (b || '').endsWith('.path') ? expand(v, cfg._root) : v);
   } else { console.error('usage: config.mjs home | root | lanes | json | top <key> | get <lane> <key>'); process.exit(2); }
 }

@@ -6,7 +6,7 @@ export DESIGN_LINE_HOME="${DESIGN_LINE_HOME:-$(node "$HERE/lib/config.mjs" home 
 LANE="${1:-}"
 if [ -z "$LANE" ]; then   # no lane: everything, one screen
   ROOT="$($CFG root)" || exit 1; echo "== design-line · all lanes · $(date '+%Y-%m-%d %H:%M')"
-  for l in $($CFG lanes); do HO="$($CFG get "$l" handoff)"; echo; echo "## $l  ($HO)"; [ -f "$HO" ] && sed -n '3p' "$HO" | cut -c1-160; [ -f "$HO" ] && grep -c '^change:' "$HO" | sed 's/^0$//' | sed 's/^\([1-9][0-9]*\)$/   \1 change: line(s) to absorb/'; done
+  for l in $($CFG lanes); do echo; echo "## $l"; for b in "$ROOT"/_line/lanes/$l/briefs/*.md; do [ -f "$b" ] || continue; st=$(grep -m1 '^status:' "$b" | awk '{print $2}'); [ "$st" = "done" ] && continue; echo "   $st  $(basename "$b" .md)  $(grep -m1 '^# ' "$b" | cut -c3-90)"; done; done
   echo; echo "## inbox"; [ -f "$ROOT/_line/inbox.md" ] && grep -E '^[0-9]{4}-' "$ROOT/_line/inbox.md" | sed 's/^/   /'
   echo; echo "## batch"; [ -f "$ROOT/_line/batch.json" ] && bash "$HERE/batch.sh" list | sed 's/^/   /'
   echo; echo "## ledger tail"; L="$ROOT/$($CFG top ledger)"; [ -f "$L" ] && grep -E '^[0-9]{4}-' "$L" | tail -8 | sed 's/^/   /'
@@ -15,13 +15,11 @@ if [ -z "$LANE" ]; then   # no lane: everything, one screen
 fi
 HOME_DIR="$($CFG home)" || exit 1
 ROOT="$($CFG root)"
-HANDOFF="$($CFG get "$LANE" handoff)"; REPO="$($CFG get "$LANE" repo)"; MAIN="$($CFG get "$LANE" main)"; PORTS="$($CFG get "$LANE" ports)"
+NOTES="$($CFG get "$LANE" notes)"; REPO="$($CFG get "$LANE" repo)"; MAIN="$($CFG get "$LANE" main)"; PORTS="$($CFG get "$LANE" ports)"
 echo "== design-line · lane $LANE · $(date '+%Y-%m-%d %H:%M')"
 echo "== profile: $HOME_DIR"
-if [ -f "$HANDOFF" ]; then
-  echo "== handoff head ($HANDOFF)"; head -8 "$HANDOFF"
-  if grep -q '^change:' "$HANDOFF"; then echo ">> change: lines present. Another agent worked here. Trust the file, catch up, then delete those lines."; fi
-else echo "== handoff note missing: $HANDOFF (copy templates/handoff.md)"; fi
+echo "== open briefs"; for b in "$ROOT"/_line/lanes/$LANE/briefs/*.md; do [ -f "$b" ] || continue; st=$(grep -m1 '^status:' "$b" | awk '{print $2}'); [ "$st" = "done" ] && continue; echo "   $st  $(basename "$b" .md)  $(grep -m1 '^# ' "$b" | cut -c3-90)"; done
+[ -n "$NOTES" ] && [ -f "$NOTES" ] && { echo "== notes ($NOTES)"; sed -n '1,12p' "$NOTES"; }
 if [ -n "$REPO" ] && [ -d "$REPO/.git" ] || git -C "$REPO" rev-parse >/dev/null 2>&1; then
   echo "== git ($REPO)"; git -C "$REPO" fetch -q origin 2>/dev/null
   echo "   origin/${MAIN:-main}: $(git -C "$REPO" log -1 --format='%h %s' origin/${MAIN:-main} 2>/dev/null)"

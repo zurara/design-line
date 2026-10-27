@@ -19,7 +19,7 @@ lanes:
   - id: example-code
     name: Component library
     kind: code                      # code | design-tool | prototype | docs | ledger
-    handoff: _line/lanes/example-code/handoff.md
+    notes: _line/lanes/example-code/notes.md      # optional; the inbox, ledger and briefs hold the state
     repo: ~/code/components
     main: main
     worktrees: .claude/worktrees    # relative to repo; one task, one worktree
@@ -61,7 +61,7 @@ lanes:
   - id: example-prototype
     name: Prototypes
     kind: prototype
-    handoff: _line/lanes/example-prototype/handoff.md
+    notes: _line/lanes/example-prototype/notes.md
     repo: ~/code/prototypes
     main: main
     worktrees: .claude/worktrees
@@ -100,7 +100,7 @@ lanes:
   - id: ledger
     name: Work items
     kind: ledger                    # optional: reconciles the ledger with the planning tool; writes there only after the designer's yes
-    handoff: _line/lanes/ledger/handoff.md
+    notes: _line/lanes/ledger/notes.md
     sources:
       - kind: planning-tool
         ref: "<work items database>"

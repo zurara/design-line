@@ -8,4 +8,4 @@ ROOT="$($CFG root)" || exit 1; LEDGER="$ROOT/$($CFG top ledger)"
 [ -f "$LEDGER" ] || cp "$HERE/../templates/ledger.md" "$LEDGER"
 LINE="$(date '+%Y-%m-%d %H:%M') | $LANE | $ITEM | $WHAT | $REF"
 printf '%s\n' "$LINE" >> "$LEDGER"; echo "ledger: $LINE"
-touch "$ROOT/_line/.dirty-$LANE"   # the Stop hook clears this once the handoff note is newer
+touch "$ROOT/_line/.dirty-$LANE"   # the Stop hook clears this once a close-out (board snapshot) followed

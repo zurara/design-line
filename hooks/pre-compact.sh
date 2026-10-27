@@ -12,7 +12,7 @@ ROOT="$(dirname "$H")"; OUT="$H/.compact-state.md"
   echo; echo "## inbox"; [ -f "$H/inbox.md" ] && grep -E '^[0-9]{4}-' "$H/inbox.md" | sed 's/^/    /'
   echo; echo "## ledger tail"; grep -E '^[0-9]{4}-' "$ROOT/$($CFG top ledger 2>/dev/null)" 2>/dev/null | tail -8 | sed 's/^/    /'
   echo; echo "## briefs not done"; grep -l -E '^status: (draft|approved|paused)' "$H"/lanes/*/briefs/*.md 2>/dev/null | sed 's/^/    /'
-  echo; echo "## read again after compaction: CONTEXT.md, _line/designer.md, the lane's handoff note. Continue the task you were on; the brief has its state."
+  echo; echo "## read again after compaction: CONTEXT.md, _line/designer.md, the lane's rules and notes. Continue the task you were on; the brief has its state."
 } > "$OUT"
 node "$HERE/../scripts/board-snapshot.mjs" >/dev/null 2>&1 || true
 exit 0

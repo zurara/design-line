@@ -1,14 +1,14 @@
 ---
 name: handoff
-description: Close out a design-line session cleanly: write the lane's handoff note to the current state (open items, waiting-for, queue), make sure the ledger has the events, stop the servers this session started by port, delete scratch files, and if a resident session exists for the lane add a change: line. Use before stopping, before a long pause, or when the designer says "wrap up", "收工", "hand off", "write the handoff".
+description: Close out a design-line session cleanly: every shipped thing has a ledger line, every brief this session touched has the right status (approved / paused / done) and its inbox line is kept or removed to match, servers this session started are stopped by port, scratch is deleted, the board is pushed. There is no status note to write; the files are the state. Use before stopping, before a long pause, or when the designer says "wrap up", "收工", "hand off".
 ---
 
-# /design-line:handoff <lane>
+# /design-line:handoff [lane]
 
-1. Compare the handoff note with reality: `git log origin/<main>` since the note's date, open PRs, the ledger tail, inbox items for this lane. Rewrite sections 4 and 5 of the note to the current state: what waits for the designer (numbered, one line each), for others, in progress, queue. Facts, no conversation history; mark what is unverified.
-2. Set "Last updated" to now. If the lane has a resident session that is not this one (org.md says so), add `change: {MM-DD HH:MM} · {this session} · {what changed, written where}` under it.
-3. Ledger: every PR opened or merged, publish, or merge this session did has a line. Add what is missing with `scripts/ledger.sh`.
-4. Briefs this session touched: `status` is right (approved / done).
+1. Ledger: every PR opened or merged, publish, or merge this session did has a line (`scripts/ledger.sh`). Add what is missing.
+2. Briefs this session touched: `status` is true (`approved` while writers run, `paused` when stopped on a question, `done` when shipped and recorded). A done task's inbox line is removed (`scripts/inbox.sh done <n>`); a paused task's question is in the inbox with its Q id.
+3. Anything the designer said this session that is not done and not in the inbox: park it now.
+4. The lane's `notes:` file, if the designer set a new rule for the lane this session: one dated line.
 5. `${CLAUDE_PLUGIN_ROOT}/scripts/ports.sh list <lane>`; stop the ones this session started, by port. Never the designer's own server (org.md names its port). Delete scratch worktrees, screenshots and temporary installs you created.
-6. If `lanes.yaml` has a `board:` URL and `budget.board` is not `off`: `node ${CLAUDE_PLUGIN_ROOT}/scripts/board-snapshot.mjs` and push it with ArtifactData `update` (`board` / `state`, `file_path` `_line/board.json`, `if_version` as last read) so the phone shows the closing state.
+6. If `lanes.yaml` has a `board:` URL and `budget.board` is not `off`: `node ${CLAUDE_PLUGIN_ROOT}/scripts/board-snapshot.mjs` and push it with ArtifactData `update` (`board` / `state`, `file_path` `_line/board.json`, `if_version` as last read).
 7. Report in three lines: what shipped, what waits for the designer, what is next in the inbox.
