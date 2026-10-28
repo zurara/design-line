@@ -75,6 +75,10 @@ Three to remember: `line` for one thing while you are here, `run` to queue and l
 
 Without a command: the inbox is a file you can reorder or tag by hand; the board is a page on your phone; a running dispatcher is reached by Remote Control. Hooks act on their own: the inbox prints when a session starts, force-push and pattern kills are blocked, a ledger line without a close-out stops the session from ending, and the state is written to a file before every compaction and read back after.
 
+## From fragments to one brief
+
+You can think out loud. The line gathers what you say, restates it as one paragraph in your words (the brief's section 0), gets your yes, and only then asks the numbered decisions and starts writers. After approval, a change of mind becomes a dated line in the brief with its cost said first, delivered to the writer at its next commit, never mid-edit. Reversals are struck through, so nobody re-asks.
+
 ## The inbox
 
 Things come up mid-task. They go into `_line/inbox.md` the moment you say them, one line each, and the task continues. Four cases: blocks the task (becomes a sub-brief now); belongs to another lane (parked for that lane); small (done now, one commit, one ledger line); run in parallel (another writer, another worktree). When a task ends you are asked one thing: which item next, or stop.

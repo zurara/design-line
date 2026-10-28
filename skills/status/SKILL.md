@@ -15,6 +15,7 @@ Read `${CLAUDE_PLUGIN_ROOT}/CONTEXT.md` once and `_line/designer.md` for the lan
    - **Shipped recently**: the ledger tail, one line each.
    - **Inbox**: grouped by lane, `#tags` kept, oldest first.
    - **Cost this week**: the first line of `node ${CLAUDE_PLUGIN_ROOT}/scripts/usage-report.mjs`.
-4. Then one question, with a recommendation first: which item to start (the one that unblocks the most, or the oldest blocking one), or answer the waiting decisions first, or stop. When the designer picks a task, continue as `/design-line:line <lane> <task>`; when they pick decisions, ask them one at a time and write each into its brief.
+4. If `scripts/inbox.sh old 30` lists lines older than 30 days, say how many and offer to archive them (`inbox.sh archive <n>`, into `_line/inbox-archive.md`) as part of the one question below.
+5. Then one question, with a recommendation first: which item to start (the one that unblocks the most, or the oldest blocking one), or answer the waiting decisions first, or stop. When the designer picks a task, continue as `/design-line:line <lane> <task>`; when they pick decisions, ask them one at a time and write each into its brief.
 
 Nothing is written during status except the answers the designer gives.

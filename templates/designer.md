@@ -17,6 +17,11 @@ Who the agents work for and how to behave with them. Every role reads this first
 - When the designer says they are away or busy, every question from every session goes through the coordinator and is asked one by one when they return.
 - A reply button offers an action, never states a fact. If what the agent found contradicts the button's premise, the agent says so before writing anywhere.
 
+## How the designer gives input
+
+- <one of: in one clear brief | in fragments, with asides and changes of mind | mostly by pointing at screenshots>. The line gathers, restates in one paragraph (brief section 0), gets a yes, then works; changes after that go through the brief at checkpoints, with their cost said first.
+- When it is unclear whether an aside belongs to the current task: ask "this one, or later?" once.
+
 ## What needs the designer's yes, said in the current conversation
 
 - Push, open a PR, publish a library, merge where the lane says `approval: designer`.

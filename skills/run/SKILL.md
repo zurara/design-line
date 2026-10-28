@@ -12,7 +12,7 @@ You are the dispatcher. You hold almost nothing: the inbox, the ledger tail, and
 1. `${CLAUDE_PLUGIN_ROOT}/scripts/inbox.sh list [lane]`. Confirm which items ride this batch (one question, recommended set first).
 2. For each item without an approved brief, answer the three questions first (what it looks like now, work-item state, other branches on the folder) the way `budget.readers` says: `fold` you read yourself, one item at a time; `lean` or `on` dispatch `line-reader`s in parallel across items. Then write each brief from `templates/brief.md` into `_line/lanes/<lane>/briefs/<task>.md`, `status: draft`.
 3. Collect every decision from every brief into one list with fixed ids (`Q1`, `Q2`, …, unique for the batch). Each AskUserQuestion starts with its id, and the id is written into the brief and the inbox, so a short answer ("3", "A") is matched back without guessing. Ask the designer one at a time, drawn or screenshotted first when visual. Write each answer into its brief. For lanes with `ship.approval: designer`, ask once per task whether to ship on completion (PR, publish); write the answer into the brief's Decisions as "ship: yes / hold".
-4. Set `status: approved` on briefs whose decisions are all answered. Items still missing an answer stay in the inbox marked `waiting`; they do not ride.
+4. Each brief's section 0 (the ask in one paragraph) gets the designer's yes before its decisions are asked; fill `rules_to_read` per brief. Set `status: approved` on briefs whose decisions are all answered. Items still missing an answer stay in the inbox marked `waiting`; they do not ride.
 5. Say in one line what will run, in what order, and what will wait. Then the designer may leave.
 
 ## 2. Run (走开), alone

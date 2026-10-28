@@ -85,6 +85,16 @@ So the practical limit is the number of lanes plus one: for three lanes, three t
 
 The board is a plain file: `scripts/render-board.mjs` writes `_line/board.html` (the kanban with the data embedded) after each state change; the designer opens it and reloads. Nothing reads from it, so it cannot drift from the files. A phone-reachable copy is optional: `lanes.yaml` may name a `board:` URL (a published `templates/board.html` with the `db` capability) and `budget.board: on`; then the same snapshot is also pushed with ArtifactData. To talk to a running dispatcher from a phone, the designer uses Remote Control on that session.
 
+## Turning the designer's words into one brief
+
+Designers think out loud: a first sentence, then asides, then a change of mind. The line does not act on the first sentence. It gathers, restates, freezes, and changes only at checkpoints:
+
+- **Gather**: while the designer is talking, nothing is dispatched. What is about the task goes into the brief draft; what is not goes to the inbox (`park`). When it is unclear which, one question: "this one, or later?"
+- **Restate**: the brief's section 0 is the whole ask in one paragraph, in the designer's words. The designer approves that paragraph first; only then are the decisions (Q1…) asked. The paragraph is the prompt the writers get, so the fragments never reach a writer.
+- **Freeze**: `status: approved` means writers may start. From here the brief changes only through "Changes after approval", with a `brief_version` bump.
+- **Change at checkpoints**: a change of mind during work is written into the brief and delivered to the writer at its next commit, never mid-edit. Before writing it, the coordinator says in one line what it costs ("this undoes the second commit and needs a re-check; go ahead?"). A reversal is struck through, so the history of mind-changes stays visible and nobody re-asks.
+- **Never pause for talk**: the designer talking does not stop the writers; only an approved change does.
+
 ## The inbox: things that come up mid-task
 
 `_line/inbox.md` is one list every session reads at start and writes the moment something new is said. One line per item: `date | lane | what | blocks: <task id or -> | from`. Four cases, each with one fixed move:
