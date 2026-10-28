@@ -1,141 +1,68 @@
 # design-line — context for agents
 
-Read this before acting as any design-line role. It says where things are and in what order to read them. It contains no organization-specific facts; those live in the profile folder.
+Rules only. The reasons and the stories are in `docs/RATIONALE.md`. No organization facts here; those are in the profile folder `_line/`.
 
-**If the plugin is not loaded** (no `/design-line:*` skills, no `line-*` agents): the files still work. Read the skill you need from `<plugin>/skills/<name>/SKILL.md` and follow it; dispatch a `general-purpose` agent with the text of `<plugin>/agents/<role>.md` prepended to its prompt; call the scripts by path. Say in your first line that you run without the plugin. The plugin lives where this file lives.
+**No plugin loaded?** Read the skill from `<plugin>/skills/<name>/SKILL.md`, dispatch `general-purpose` with `<plugin>/agents/<role>.md` prepended, call scripts by path, and say so in your first line.
 
-## The four layers
+## Layers
 
-| Layer | What it holds | Where | Who changes it |
-| --- | --- | --- | --- |
-| Framework | roles, pipeline shape, templates, scripts, hooks | this plugin | the plugin's maintainers |
-| Organization profile | repos, ports, tools, IDs, people, release process | `_line/org.md` | the designer, once; agents only when the designer says so |
-| Designer profile | language, how to ask, approvals, screenshot scale, model and effort table | `_line/designer.md` | the designer |
-| Lane configuration | one block per lane: sources, rules, gate, ship, archive | `_line/lanes.yaml` | the designer with `/design-line:init`; the coordinator only after the designer says so |
+| Layer | Where | Changed by |
+| --- | --- | --- |
+| Framework: roles, shape, templates, scripts, hooks | this plugin | maintainers |
+| Organization profile | `_line/org.md` | the designer |
+| Designer profile | `_line/designer.md` | the designer |
+| Lanes | `_line/lanes.yaml` | `/design-line:init`; the coordinator only on the designer's yes |
+| Domain rules | files the lane's `rules:` names | the organization |
 
-Domain rules (how the designer's work must look and behave) are files the lane points to under `rules:`. They belong to the organization, never to the plugin.
+Find `_line/`: `$DESIGN_LINE_HOME`, else walk up from the working directory (`scripts/lib/config.mjs home`). None: `/design-line:init`.
 
-## Finding the profile folder
+## Read order at start
 
-The profile folder is named `_line/`. Look for it in `$DESIGN_LINE_HOME`, else walk up from the working directory until a `_line/lanes.yaml` is found. `scripts/lib/config.mjs home` prints the path. If none exists, the only thing to do is run `/design-line:init`.
+1. `_line/designer.md`. 2. `_line/org.md`. 3. the lane's block in `lanes.yaml`. 4. the lines `start.sh <lane>` prints (this lane's inbox, open briefs, git, PRs, ports, ledger tail) and the lane's `notes:` file if any. 5. the lane's rules: the sections the brief names, else whole. Then verify against git and PRs; files describe the past.
 
-## Read order, every time a role starts
-
-1. `_line/designer.md` — how to speak to this designer and what needs their yes.
-2. `_line/org.md` — the world this work lives in.
-3. `_line/lanes.yaml` — the lane you are on.
-4. `_line/inbox.md` (items for this lane, waiting-for-others lines, and anything marked `blocks:` the task at hand), the lane's `notes:` file if it has one, and the briefs under `lanes/<id>/briefs/` whose status is not `done`.
-5. The lane's `rules:` files, whole, before the first edit (writers quote the last line of each in their report to prove they read it).
-6. `_line/ledger.md`, the tail, to see what shipped recently.
-
-Then verify against reality before trusting any of it: git state, open PRs, listening ports, the gate. Files describe the past; git describes now.
-
-## The shape
-
-Every lane has the same six stations. A task walks them in order, in one session.
+## The shape, one session per task
 
 ```
 read ──▶ brief ──▶ [designer approves] ──▶ write ──▶ check ──▶ ship ──▶ record
 ```
 
-- **read**: before any brief, three things are answered: (1) what the thing to change looks like now, (2) the state of the related work item, (3) whether another branch touches the same folder. Skipping this was the single most expensive mistake of the first batch. **Who reads is set by `budget.readers`**: `fold` means the coordinator reads the sources itself, bounded (a file at a time, the relevant sections, never a whole repo), and writes the brief from what it saw; `lean` dispatches one `line-reader` per task with a 400-word limit; `on` dispatches one per source. `fold` is the default because every handoff is a summary and summaries lose detail; use a reader when the sources are too large to read in the coordinator's context or when several sources can be read in parallel.
-- **brief**: the coordinator writes one brief per task (`templates/brief.md`), with `status: draft`.
-- **approve**: the designer answers the numbered decisions. Only then `status: approved`. "OK, go on" moves work forward; it is not a choice between options.
-- **write**: one writer per worktree. Writers that touch the same files run one after another. A writer that meets a question the brief does not answer **stops before deciding** and hands it back; it never asks the designer and never "does it first and lists it after". A task whose writer stopped is `paused`, never `done`. Each lane may name a `defaults:` file (known unknowns and what to do without asking); a case it covers is not a question.
-- **check**: a checker runs the lane's gate and measures the brief's numbers in the DOM the moment a writer returns; screenshots only for what the brief marks for the designer's eyes or what a measurement cannot decide, capped by `budget.max_shots`. It fixes nothing.
-- **ship**: what `ship.mode` says: open a PR, merge, publish, or nothing. `ship.approval: designer` means the designer must say so in the current conversation; relayed consent from another session does not count.
-- **record**: append one line to `_line/ledger.md`; keep the brief's status true; keep briefs with the task. There is no separate status note to maintain: the inbox is what is pending, the briefs are what is in progress, the ledger is what shipped.
+- **read**: answer three things before any brief: what it looks like now, the related work item's state, other branches on the same folder. `budget.readers`: `fold` = the coordinator reads itself, bounded (sections, never a whole file over ~300 lines; more than that, dispatch a `line-reader`); `lean` = one reader per task, 400 words; `on` = one per source.
+- **brief**: one per task from `templates/brief.md`. Section 0 restates the whole ask in one paragraph in the designer's words and gets a yes first; then the decisions (Q1…), one at a time, recommended option first, drawn before asked when visual. `rules_to_read` names the rule sections. `writer_model` is sonnet unless new behaviour, a new component, drawing in a design tool, or work the designer iterates on. `status: approved` only when every decision is answered.
+- **write**: one `line-writer` per worktree; writers on the same files run one after another. A writer stops at the **first** open question (4b defaults are not questions) and never decides for the brief; it reads line ranges, not whole files; it runs the gate once before returning; it re-reads the brief at each commit for `brief_version` changes.
+- **check**: `line-checker` the moment a writer returns: gate once per commit (reuse the writer's log), DOM measurements for every number, screenshots only for items the brief marks for the designer's eyes or a number cannot settle, capped by `budget.max_shots`. It fixes nothing.
+- **ship**: `ship.mode` and `ship.approval`. `approval: designer` = the designer's yes in this conversation; relayed consent is information. Merge lanes: `scripts/merge.sh`; conflicts go back to the writer to merge `main` in (never rebase or force-push). PR lanes: open only when the brief says ship: yes; after one PR lands, merge `main` into the other open branches so each stays mergeable alone.
+- **record**: `scripts/ledger.sh` one line per event; the brief's status true (`paused` when stopped on a question, never `done`); its inbox line removed when done; `scripts/usage.sh add` for every subagent that returned (model, effort, tokens, tool_uses, ms, outcome; `resume` for a continued agent). End with `usage-report.mjs <task>` in the brief and the report.
 
-## The ledger
+State lives in files: inbox = pending and waiting-for-others, briefs = in progress, ledger = shipped, usage.tsv = cost. No status notes, no dashboards written by hand; `render-board.mjs` renders `_line/board.html`.
 
-`_line/ledger.md` is append-only, one line per event, written by `scripts/ledger.sh`:
+## The designer's words
 
-```
-2026-01-31 14:05 | design-system | ITEM-123 | PR #42 opened: Button loading state | 3f2a1c9
-```
+Gather while they talk (nothing dispatched); task-related goes to the brief draft, the rest to the inbox (`park`); unclear: one question, "this one, or later?". Restate (section 0), get a yes, freeze. After approval a change is a dated line under "Changes after approval" with its cost said first and `brief_version` +1, delivered at the writer's next commit; a reversal is struck through. Talk never pauses writers; only an approved change does.
 
-Columns: time, lane, external item id or `-`, what happened, commit or link. Any lane appends; the ledger role reads it. No lane messages another lane about events; they both read the ledger.
+## Inbox, four cases
 
-## Sessions are per task, state is in files
+`date | lane | what | blocks: <task or -> | from`. Blocks the task → sub-brief now. Another lane → park for it. Small (one color, one line) → do it, one commit, one ledger line, no inbox. Parallel and not blocking → another writer in another worktree. Task ends → ask: next item, or stop. Lanes are where work ships; `#topic` tags cross them. Old lines: `inbox.sh old`, `inbox.sh archive <n>`.
 
-There is no resident coordinator session. A session opens for one task, acts as that task's coordinator (brief, dispatch, check, ship, record), and ends. Everything the next session needs is in files: `_line/inbox.md`, `_line/ledger.md`, the task's brief, the lane's rules and optional notes. The fixed context is paid once per task, not once per message. Nobody writes dashboards by hand; the board is rendered from the files.
+## Batches, depth, sessions
 
-## Batches: several tasks while the designer is away
+`/design-line:run` is the one optional resident: load (briefs, every decision answered, ship yes/hold) while the designer is present, then run approved tasks as writers and checkers, parallel by worktree within `budget.parallel`, serial where files are shared, landing one at a time; a paused task parks its question and the batch moves on; one report on return; the session ends with the batch. **Depth is two**: a session and its workers, never a coordinator under a coordinator. At most one session per lane plus one dispatcher. Shared files take locks (`_line/.lock-*`); board writes carry a version; `main` is protected by the merge script; ports are checked before use.
 
-`/design-line:run` is the one optional resident: a dispatcher that holds only the inbox and the ledger tail. It loads a batch while the designer is present (briefs written, every decision answered one at a time, ship consent recorded in each brief), runs each approved task as its own `line-coordinator` subagent (parallel across lanes and worktrees within `limits`, serial where writers share files), parks any question a task hits and moves on, and reports once when the designer returns, then resumes paused tasks with their answers. Walking away is possible exactly for tasks whose decisions were answered first. Parallelism is by worktree; landing is serial: the dispatcher merges finished branches one at a time, re-running the gate on the merged tree, and sends a conflicting branch back to its writer to merge `main` in (never rebase or force-push).
+## Questions and reports
 
-## Running several sessions at once
+Only the lane that is blocked asks, one question at a time, each with a fixed id (Q1…) written into the brief and the inbox. A subagent never asks: it numbers its questions in its report; the parent asks and sends the answer back with SendMessage. A report before all children returned is marked `interim` and records nothing. Reports follow designer.md: what changed, screenshots (few), gate, link, open items, the cost line.
 
-Reads never conflict; every file is plain text. Writes are arranged so that sessions do not step on each other:
+## Models and budget
 
-- Append-only files (`ledger.md`, `usage.tsv`) and the inbox `add` take any number of writers.
-- `batch.json` and inbox `done` are read-modify-write; the scripts take a short lock (`_line/.lock-*`), so two sessions may call them at once. A stale lock directory left by a crashed session is removed by hand.
-- The board document is pinned by version: when an ArtifactData `update` reports a version conflict, re-run `board-snapshot.mjs` and update again with the version it names. The snapshot is built from files, so nothing is lost.
-- A brief has one writer at a time, and a lane's `notes:` file too: **run at most one session per lane**, plus optionally one dispatcher. The dispatcher's subagents count as its session.
-- `main` is protected by the merge script: it refuses to push when `origin/main` moved under it; the loser re-runs. Two sessions may land branches on the same repo; they just take turns.
-- Ports: a checker calls `ports.sh list <lane>` and takes a free one; two checkers on one lane need two free ports in `lanes.yaml`.
+designer.md has the table. Writers: small unless the brief says otherwise. Readers, checkers, mechanical edits: small, medium. A small model's wrong result goes back once; the second time, a larger model. `budget:` in lanes.yaml: `plan`, `weekly_tokens`, `board`, `parallel`, `readers`, `default_model`, `experiment` (label every usage row carries; `usage-report.mjs` compares groups), `max_shots`. The budget never removes a gate, a check, the designer's yes or the ledger line.
 
-So the practical limit is the number of lanes plus one: for three lanes, three task sessions and a dispatcher. More than one session on the same lane is allowed for reading and parking, not for running tasks.
+## After shipping
 
-## Budget
+`line-auditor` compares the live product with its design source: DOM numbers first, overlay only where a number cannot settle it; verdict per finding (`product`, `design`, `unclear`); findings become inbox lines; `/design-line:audit` drives it and ends with the lane's after-review step (a prototype lane moves the flow's status) only on the designer's yes.
 
-`budget:` in lanes.yaml says what the designer's plan can carry. Roles read it: `board: off` means no artifact pushes (the local `_line/board.html` is still rendered); `parallel` caps the dispatcher; `readers: lean` means one reader per task with a 400-word limit instead of one per source; `default_model` is the writer and coordinator model when the lane block does not say. `weekly_tokens` lets `usage-report.mjs` show the week's subagent total against the budget. Nothing in the budget removes a gate, a check, the designer's yes, or the ledger line: those are cheap and are what the line is for.
+## Compaction and processes
 
-## Seeing it from a phone
-
-The board is a plain file: `scripts/render-board.mjs` writes `_line/board.html` (the kanban with the data embedded) after each state change; the designer opens it and reloads. Nothing reads from it, so it cannot drift from the files. A phone-reachable copy is optional: `lanes.yaml` may name a `board:` URL (a published `templates/board.html` with the `db` capability) and `budget.board: on`; then the same snapshot is also pushed with ArtifactData. To talk to a running dispatcher from a phone, the designer uses Remote Control on that session.
-
-## Turning the designer's words into one brief
-
-Designers think out loud: a first sentence, then asides, then a change of mind. The line does not act on the first sentence. It gathers, restates, freezes, and changes only at checkpoints:
-
-- **Gather**: while the designer is talking, nothing is dispatched. What is about the task goes into the brief draft; what is not goes to the inbox (`park`). When it is unclear which, one question: "this one, or later?"
-- **Restate**: the brief's section 0 is the whole ask in one paragraph, in the designer's words. The designer approves that paragraph first; only then are the decisions (Q1…) asked. The paragraph is the prompt the writers get, so the fragments never reach a writer.
-- **Freeze**: `status: approved` means writers may start. From here the brief changes only through "Changes after approval", with a `brief_version` bump.
-- **Change at checkpoints**: a change of mind during work is written into the brief and delivered to the writer at its next commit, never mid-edit. Before writing it, the coordinator says in one line what it costs ("this undoes the second commit and needs a re-check; go ahead?"). A reversal is struck through, so the history of mind-changes stays visible and nobody re-asks.
-- **Never pause for talk**: the designer talking does not stop the writers; only an approved change does.
-
-## The inbox: things that come up mid-task
-
-`_line/inbox.md` is one list every session reads at start and writes the moment something new is said. One line per item: `date | lane | what | blocks: <task id or -> | from`. Four cases, each with one fixed move:
-
-1. **Blocks the current task**: it becomes a sub-brief of the current task in the same session. If it is large, write the notes file first, do it, come back.
-2. **Belongs to another lane**: write it to the inbox with that lane's id. The next session on that lane picks it up. No message to anyone.
-3. **Small** (one color, one line of copy): do it now, one commit, one ledger line. It never enters the inbox.
-4. **Should run now in parallel and does not block**: dispatch a writer to another worktree from this session, or the designer opens a second session. The designer keeps talking to this one.
-
-Lanes say where work ships; a topic says what it is for. Tag an inbox line, a task title or a brief with `#topic` (for example `#team`, `#homepage-v3`) when work on one topic crosses lanes. The board shows the tags and filters by them; nothing else reads them.
-
-When a task ends, the session reads the inbox and asks one question: which item next, or stop. The designer reorders by editing the file or saying so. The daily digest takes "still open" from the inbox.
-
-## Learning from each task
-
-Every subagent dispatch is recorded in `_line/usage.tsv` (`scripts/usage.sh add …`) with its model, effort, tokens, tool uses, duration and outcome: `clean` (first pass accepted), `returned` (sent back once), `escalated` (re-dispatched on a larger model), `paused` (stopped on a question). The numbers come from the Agent tool's usage block; the session's own tokens are not visible to the model (`/cost` shows them to the designer). At the end of a task `scripts/usage-report.mjs <task>` prints the cost per role and a "Next time" direction derived from the outcomes: a role that is clean several times on a large model is a candidate for a small model; a small model that had to be escalated keeps the large default or gets the missing rule written down; a pause means the brief template or designer.md lacks a default. The report goes into the brief and ends the task's report to the designer. The board shows each task's total and models.
-
-## Depth
-
-Two levels at most: a session (or the dispatcher) and the workers it dispatches. A dispatcher does not dispatch coordinators that dispatch workers; for a batch it either dispatches writers and checkers itself per task, or runs `/design-line:line` for each task in turn. Three levels made the first batch hand back interim reports and lose the thread.
-
-## After shipping, and after the designer reviews
-
-`line-auditor` compares the live product with its design source (design-tool node, prototype page or brief): DOM numbers first, a screenshot overlay only where a number cannot settle it. It files nothing; its findings become inbox lines with a verdict each (`product` deviates, `design` is stale, or the designer decides). `/design-line:audit` drives it, and ends with the lane's after-review step when the lane's rules define one (a prototype lane records the designer's acceptance as the flow's status, moved by one commit only after she says so).
-
-## Interim reports
-
-A coordinator that is asked to report while its own subagents are still running labels the report `interim` in its first line and says which agents are still out. The caller treats an interim report as a checkpoint, not a result, and sends the agent back with SendMessage. Nothing is recorded as done, and no ledger line is written, from an interim report.
-
-## Questions to the designer
-
-Only the coordinator of the lane that is blocked asks. Every question carries a fixed id (`Q1`, `Q2`, …) that starts the question text and is written into the brief and the inbox, so a short answer ("3", "A") is matched back without guessing. One question at a time, options with the recommended one first, drawn or screenshotted before asking when the difference is visual. A role running as a subagent cannot ask: it numbers the decisions in its report; the parent session asks and sends the answer back to the same agent.
-
-## Choosing models
-
-Use the table in `_line/designer.md` (the template has a default). Writers run on a small model unless the brief says `writer_model: opus`, which the coordinator sets for new behaviour, a new component, drawing in a design tool, or work the designer will iterate on. Reading, measuring, mechanical edits: a small model, medium effort. The first week of usage data: large-model writers were 68% of all subagent tokens and only 54% of their runs came back clean, mostly because they kept working past an open question; the model was not what made them expensive. Open design or architecture problems: the largest effort. A small model's result that is wrong or incomplete goes back to the same worker once; the second time, re-dispatch on a larger model.
+Before compaction the hook writes `_line/.compact-state.md`; after, it is printed back: continue from the brief. Record the PID or port of anything you start and stop it by that only; never match processes by name; no background waits that hold your turn.
 
 ## Never
 
-- Push, open a PR, publish, or write to the organization's planning tool without the designer's yes when the lane says approval is the designer's.
-- Force-push, push someone else's branch, or use a shared `git stash`.
-- Kill processes by name pattern (`pgrep -f`, `pkill -f`, `killall`). Stop your own processes by the PID you recorded when starting them, or by port. Other agents on the machine run the same script names.
-- Change versions or release metadata; releases belong to the developers unless `org.md` says otherwise.
-- Leave servers, scratch installs or screenshots behind after a check.
+Push, PR, publish or planning-tool write without the designer's yes where the lane requires it · force-push · shared `git stash` · kill by name pattern · change versions or release files · ask on behalf of another lane · write dashboards by hand · leave servers, scratch or screenshots behind.
